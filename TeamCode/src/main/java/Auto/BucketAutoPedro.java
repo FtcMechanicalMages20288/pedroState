@@ -1,4 +1,6 @@
 package Auto;
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.localization.Pose;
@@ -24,7 +26,7 @@ import pedroPathing.constants.LConstants;
  * @author Baron Henderson - 20077 The Indubitables
  * @version 2.0, 11/28/2024
  */
-
+@Config
 @Autonomous(name = "Bucket Auto Pedro", group = "Examples")
 public class BucketAutoPedro extends OpMode {
 

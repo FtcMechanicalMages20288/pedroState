@@ -177,6 +177,7 @@ public class specAutoPedro extends OpMode {
             case 0:
                 follower.followPath(scorePreload);
                 setPathState(1);
+
                 break;
             case 1:
 
