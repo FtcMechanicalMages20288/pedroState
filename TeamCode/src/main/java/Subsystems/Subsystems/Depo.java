@@ -1,4 +1,4 @@
-package pedroPathing.Subsystems;
+package Subsystems.Subsystems;
 
 
 import com.qualcomm.robotcore.hardware.Servo;
@@ -15,23 +15,27 @@ public class Depo extends Subsystem {
     private Depo() { }
 
     // USER CODE
-    public Servo depoRight, depoLeft, wristClaw;
+    public Servo depoRight, depoLeft, wristClaw,extendArm;
     public String wrist = "wristClaw";
     public String right  = "RightDepo";
     public String left= "LeftDepo";
+    public String extend = "extendDepo";
 
 
     public Command resetDepo() {
         Double rotate = 0.6;
         Double rightTilt = 0.03;
         Double leftTilt = 0.97;
+        Double extendDepo = 0.655 ;
+
 
         return new MultipleServosToSeperatePositions(
                 Map.of(
                         depoRight, rightTilt,
                         depoLeft, leftTilt,
-                        wristClaw, rotate
-                ),
+                        wristClaw, rotate,
+                        extendArm, extendDepo
+                        ),
                 this);
     }
 
@@ -54,28 +58,31 @@ public class Depo extends Subsystem {
         Double rotate = 0.6;
         Double rightTilt = 0.67;
         Double leftTilt = 0.33;
+        Double extendDepo = 0.71;
 
         return new MultipleServosToSeperatePositions(
                 Map.of(
                         depoRight, rightTilt,
                         depoLeft, leftTilt,
-                        wristClaw, rotate
-                ),
+                        wristClaw, rotate,
+                        extendArm, extendDepo
+                        ),
 
                 this);
     }
 
     public Command specDepo() {
         Double rotate = 0.6;
-        Double rightTilt = 0.9;
-        Double leftTilt = 0.1;
-
+        Double rightTilt = 0.55;
+        Double leftTilt = 0.35;
+        Double extendDepo = 0.93;
         return new MultipleServosToSeperatePositions(
                 Map.of(
                         depoRight, rightTilt,
                         depoLeft, leftTilt,
-                        wristClaw, rotate
-                ),
+                        wristClaw, rotate,
+                        extendArm, extendDepo
+                        ),
 
                 this);
     }
@@ -85,6 +92,7 @@ public class Depo extends Subsystem {
         wristClaw = OpModeData.INSTANCE.getHardwareMap().get(Servo.class, wrist);
         depoRight = OpModeData.INSTANCE.getHardwareMap().get(Servo.class, right);
         depoLeft = OpModeData.INSTANCE.getHardwareMap().get(Servo.class, left);
+        extendArm = OpModeData.INSTANCE.getHardwareMap().get(Servo.class, extend);
 
     }
 }

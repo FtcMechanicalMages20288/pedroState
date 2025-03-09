@@ -8,19 +8,20 @@ import com.pedropathing.pathgen.Path;
 import com.pedropathing.pathgen.PathChain;
 import com.pedropathing.pathgen.Point;
 import com.pedropathing.util.Constants;
-import com.pedropathing.util.Timer;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.rowanmcalpin.nextftc.core.command.Command;
 import com.rowanmcalpin.nextftc.core.command.groups.ParallelGroup;
 import com.rowanmcalpin.nextftc.core.command.groups.SequentialGroup;
 import com.rowanmcalpin.nextftc.core.command.utility.delays.Delay;
-import com.rowanmcalpin.nextftc.ftc.NextFTCOpMode;
+import com.rowanmcalpin.nextftc.ftc.hardware.controllables.ResetEncoder;
 import com.rowanmcalpin.nextftc.pedro.FollowPath;
 import com.rowanmcalpin.nextftc.pedro.PedroOpMode;
 
-import pedroPathing.Subsystems.Claw;
-import pedroPathing.Subsystems.Depo;
-import pedroPathing.Subsystems.Lift;
+import java.util.Set;
+
+import Subsystems.Subsystems.Claw;
+import Subsystems.Subsystems.Depo;
+import Subsystems.Subsystems.Lift;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
@@ -155,23 +156,26 @@ public class specNextFTC extends PedroOpMode {
         );
     }
     public Command preLoadRoutine() {
+
         return new SequentialGroup(
-                new ParallelGroup(
+               Depo.INSTANCE.resetDepo(),
+
+        new ParallelGroup(
                        // new FollowPath(scorePreload),
-                        Lift.INSTANCE.specPos(),
-                        Depo.INSTANCE.specDepo()
+                        Depo.INSTANCE.specDepo(),
+                        Lift.INSTANCE.specPos()
+
                         //Depo.
                 ),
-                new ParallelGroup(
-                        Claw.INSTANCE.open(),
-                        Lift.INSTANCE.depoSpec()
+                new SequentialGroup(
+                        Lift.INSTANCE.depoSpec(),
+                        Claw.INSTANCE.open()
                 ),
                 new Delay(1.0),
 
                 new ParallelGroup(
-                        Claw.INSTANCE.open(),
                         Lift.INSTANCE.resetPos(),
-                        Depo.INSTANCE.specPic()
+                        Depo.INSTANCE.resetDepo()
                 )
         );
     }
@@ -208,7 +212,7 @@ public class specNextFTC extends PedroOpMode {
                         Claw.INSTANCE.open(),
                         Lift.INSTANCE.depoSpec()
                 ),
-                new Delay(1.0),
+                new Delay(1),
                 Lift.INSTANCE.resetPos()
         );
     }

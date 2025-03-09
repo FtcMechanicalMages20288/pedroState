@@ -1,11 +1,13 @@
-package pedroPathing.Subsystems;
+package Subsystems.Subsystems;
 
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.rowanmcalpin.nextftc.core.Subsystem;
 import com.rowanmcalpin.nextftc.core.command.Command;
 import com.rowanmcalpin.nextftc.core.control.controllers.PIDFController;
 import com.rowanmcalpin.nextftc.core.control.controllers.feedforward.StaticFeedforward;
 import com.rowanmcalpin.nextftc.ftc.hardware.controllables.MotorEx;
 import com.rowanmcalpin.nextftc.ftc.hardware.controllables.MotorGroup;
+import com.rowanmcalpin.nextftc.ftc.hardware.controllables.ResetEncoder;
 import com.rowanmcalpin.nextftc.ftc.hardware.controllables.RunToPosition;
 public class Lift extends Subsystem {
     // BOILERPLATE
@@ -19,28 +21,33 @@ public class Lift extends Subsystem {
 
     public MotorGroup Verts;
 
-    public PIDFController controller = new PIDFController(0.005, 0.0, 0.0, new StaticFeedforward(0.0));
+    public PIDFController controller = new PIDFController(0.018, 0.0, 0.001, new StaticFeedforward(0.0));
+
 
     public Command specPos() {
+
         return new RunToPosition(Verts, // MOTOR TO MOVE
-                925, // TARGET POSITION, IN TICKS
+                1600, // TARGET POSITION, IN TICKS
                 controller, // CONTROLLER TO IMPLEMENT
                 this); // IMPLEMENTED SUBSYSTEM
     }
 
     public Command depoSpec() {
         return new RunToPosition(Verts, // MOTOR TO MOVE
-                700, // TARGET POSITION, IN TICKS
+                1400, // TARGET POSITION, IN TICKS
                 controller, // CONTROLLER TO IMPLEMENT
                 this); // IMPLEMENTED SUBSYSTEM
     }
 
     public Command resetPos() {
+        Lift.INSTANCE.leftVert.resetEncoder();
+        Lift.INSTANCE.rightVert.resetEncoder();
         return new RunToPosition(Verts, // MOTOR TO MOVE
                 0, // TARGET POSITION, IN TICKS
                 controller, // CONTROLLER TO IMPLEMENT
                 this); // IMPLEMENTED SUBSYSTEM
     }
+
 
     public Command depoSampPos() {
         return new RunToPosition(Verts, // MOTOR TO MOVE
@@ -53,6 +60,9 @@ public class Lift extends Subsystem {
     public void initialize() {
         leftVert = new MotorEx("leftVert");
         rightVert = new MotorEx("rightVert");
+        rightVert.setDirection(DcMotor.Direction.REVERSE);
+
+
         Verts = new MotorGroup(leftVert, rightVert);
     }
 }

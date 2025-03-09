@@ -53,14 +53,20 @@ public class specAutoPedro extends OpMode {
     /** Lowest (First) Sample from the Spike Mark */
     private final Pose pickup1Pose = new Pose(10, 30, Math.toRadians(180));
 
-    private final Pose lineUpControl = new Pose (49.8,47.2,Math.toRadians(180));
+    private final Pose lineUpControl = new Pose (25.542087644021205,32.583652173493704,Math.toRadians(180));
     private final Pose lineUp = new Pose(58,31,Math.toRadians(180));
     private final Pose firstPush = new Pose(22,31, Math.toRadians(180));
     private final Pose goBackControl = new Pose(63.5,31.3, Math.toRadians(180));
     private final Pose goBack = new Pose(58,23, Math.toRadians(180));
-    private final Pose secondPush = new Pose(16, 19, Math.toRadians(180));
-    private final Pose goBack2 = new Pose(20,19, Math.toRadians(180));
-    private final Pose thirdPush = new Pose();
+    private final Pose secondPush = new Pose(16, 23, Math.toRadians(180));
+
+    private final Pose goBack2Control = new Pose(63.19464787788005,25.53755903031544, Math.toRadians(180));
+    private final Pose goBack2 = new Pose(58,14.087657672650748, Math.toRadians(180));
+    private final Pose thirdPush = new Pose(20, 14.08, Math.toRadians(180));
+
+    private final Pose goBack3 = new Pose(24,14.08, Math.toRadians(180));
+
+
     /** Middle (Second) Sample from the Spike Mark */
     private final Pose pickup3Pose = new Pose(49, 125, Math.toRadians(90));
 
@@ -98,11 +104,14 @@ public class specAutoPedro extends OpMode {
          * Here is a explanation of the difference between Paths and PathChains <https://pedropathing.com/commonissues/pathtopathchain.html> */
 
         /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
+
+        // Scored preloaded block
         scorePreload = new Path(new BezierLine(new Point(startPose), new Point(scorePose)));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
         /* Here is an example for Constant Interpolation
         scorePreload.setConstantInterpolation(startPose.getHeading()); */
+
 
         /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         grabPickup1 = follower.pathBuilder()
@@ -111,8 +120,8 @@ public class specAutoPedro extends OpMode {
                 .build();
 
         pushChain = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(pickup1Pose), new Point(lineUpControl), new Point(lineUp)))
-                .setLinearHeadingInterpolation(pickup1Pose.getHeading(), lineUp.getHeading())
+                .addPath(new BezierCurve(new Point(scorePose), new Point(lineUpControl), new Point(lineUp)))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), lineUp.getHeading())
 
 
                 .addPath(new BezierLine(new Point(lineUp),new Point(firstPush)))
@@ -125,17 +134,22 @@ public class specAutoPedro extends OpMode {
                 .addPath(new BezierLine(new Point(goBack),new Point(secondPush)))
                 .setLinearHeadingInterpolation(goBack.getHeading(), secondPush.getHeading())
 
-                .addPath(new BezierLine(new Point(secondPush),new Point(goBack2)))
+                .addPath(new BezierCurve(new Point(secondPush), new Point(goBack2Control), new Point(goBack2)))
                 .setLinearHeadingInterpolation(secondPush.getHeading(), goBack2.getHeading())
 
+                .addPath(new BezierLine(new Point(goBack2),new Point(thirdPush)))
+                .setLinearHeadingInterpolation(goBack2.getHeading(), thirdPush.getHeading())
+
+                .addPath(new BezierLine(new Point(thirdPush),new Point(goBack3)))
+                .setLinearHeadingInterpolation(thirdPush.getHeading(), goBack3.getHeading())
 
 
                 .build();
 
         /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(secondPush), new Point(scorePose)))
-                .setLinearHeadingInterpolation(secondPush.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(new Point(goBack3), new Point(scorePose)))
+                .setLinearHeadingInterpolation(goBack3.getHeading(), scorePose.getHeading())
                 .build();
 
 
@@ -175,10 +189,12 @@ public class specAutoPedro extends OpMode {
     public void autonomousPathUpdate() {
         switch (pathState) {
             case 0:
-                follower.followPath(scorePreload);
-                setPathState(1);
+                follower.followPath(scorePreload,true);
+                setPathState(2);
 
                 break;
+
+                //Pickup1 is skipped until the pushChain
             case 1:
 
                 /* You could check for

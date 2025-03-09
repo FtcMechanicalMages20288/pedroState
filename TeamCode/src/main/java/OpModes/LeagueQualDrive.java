@@ -19,7 +19,7 @@ public class LeagueQualDrive extends LinearOpMode {
 
     private DcMotor frontLeft, backLeft, frontRight, backRight, extension;
     private DcMotor intake, rightVerticalMotor, leftVerticalMotor;
-    private Servo extendDepo, tiltDepo, claw, leftHanger, rightHanger, holdChute, intakeTilt, wristClaw;
+    private Servo extendDepo, depoLeft, depoRight, claw, leftHanger, rightHanger, holdChute, intakeTilt, wristClaw;
     private TouchSensor vertSwitch, hortSwitch;
     private ColorSensor colorChute;
 
@@ -58,7 +58,8 @@ public class LeagueQualDrive extends LinearOpMode {
 
         intake = hardwareMap.dcMotor.get("intake");
         extendDepo = hardwareMap.servo.get("extendDepo");
-        tiltDepo = hardwareMap.servo.get("tiltDepo");
+        depoRight = hardwareMap.servo.get("RightDepo");
+        depoLeft = hardwareMap.servo.get("LeftDepo");
         claw = hardwareMap.servo.get("claw");
         holdChute = hardwareMap.servo.get("holdChute");
 
@@ -73,8 +74,8 @@ public class LeagueQualDrive extends LinearOpMode {
         leftVerticalMotor = hardwareMap.dcMotor.get("leftVert");
         extension = hardwareMap.dcMotor.get("extension");
 
-        vertSwitch = hardwareMap.touchSensor.get("vertSwitch");
-        hortSwitch = hardwareMap.touchSensor.get("hortSwitch");
+        vertSwitch = hardwareMap.touchSensor.get("hortSwitch");//Todo: Changed cause screwed in wiring
+        hortSwitch = hardwareMap.touchSensor.get("vertSwitch");
 
         colorChute = hardwareMap.get(ColorSensor.class, "colorChute");
 
@@ -85,6 +86,9 @@ public class LeagueQualDrive extends LinearOpMode {
 
         backRight.setDirection(DcMotor.Direction.REVERSE);
         frontRight.setDirection(DcMotor.Direction.REVERSE);
+
+        leftVerticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
         //intakeReset();
@@ -162,6 +166,7 @@ public class LeagueQualDrive extends LinearOpMode {
 
             //Todo: Transfer Logic
 
+            /*
             if (!hortSwitch.isPressed()) {
                 OpenClaw();
                 holdChute.setPosition(0.105);
@@ -169,6 +174,8 @@ public class LeagueQualDrive extends LinearOpMode {
             else if(hortSwitch.isPressed()) {
                 holdChute.setPosition(0.46);
             }
+
+             */
 
 
 
@@ -467,40 +474,38 @@ public class LeagueQualDrive extends LinearOpMode {
 
     public void OpenClaw() {
 
-        claw.setPosition(0.2);
+        claw.setPosition(0.46);
     }
 
     public void CloseClaw() {
 
-        claw.setPosition(0.8);
-    }
-
-    public void depoUp() {
-        extendDepo.setPosition(0.71);
-        tiltDepo.setPosition(0.17);
-
+        claw.setPosition(0.58);
     }
 
     public void pickSpecPos() {
-        tiltDepo.setPosition(0.24);
+        depoRight.setPosition(0.67);
+        depoLeft.setPosition(0.33);
         extendDepo.setPosition(0.93);
-        wristClaw.setPosition(0.0);
+        wristClaw.setPosition(0.6);
     }
 
     public void specPos() {
-        tiltDepo.setPosition(0.04);
+        depoLeft.setPosition(0.9);
+        depoRight.setPosition(0.1);
         extendDepo.setPosition(0.93);
-        wristClaw.setPosition(0.79);
+        wristClaw.setPosition(0.6);
     }
 
     public void resetPos() {
-        tiltDepo.setPosition(0.0);//0.11
-        wristClaw.setPosition(0.79); //0.8
+        depoRight.setPosition(0.03);
+        depoLeft.setPosition(0.97);
+        wristClaw.setPosition(0.6); //0.8
         extendDepo.setPosition(0.655);//0.625
     }
 
     public void depositPos() {
-        tiltDepo.setPosition(0.22);
+        depoRight.setPosition(0.63);
+        depoLeft.setPosition(0.37);
         extendDepo.setPosition(0.71);
     }
 
@@ -533,8 +538,14 @@ public class LeagueQualDrive extends LinearOpMode {
     }
 
     public void EncoderTelemetry() {
-        telemetry.addData("leftMot", leftVerticalMotor.getCurrentPosition() * -1);
+
+        telemetry.addData("leftMot", leftVerticalMotor.getCurrentPosition());
         telemetry.update();
+
+        if (vertSwitch.isPressed()){
+            leftVerticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        }
     }
 
     private void tankMecanumMovementController() {
