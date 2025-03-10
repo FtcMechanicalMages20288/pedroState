@@ -30,6 +30,7 @@ public class specNextFTC extends PedroOpMode {
     public specNextFTC() {
         super(Claw.INSTANCE, Lift.INSTANCE, Depo.INSTANCE);
     }
+    /** Start Pose of our robot */
     private final Pose startPose = new Pose(9, 69, Math.toRadians(90));
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
@@ -38,26 +39,19 @@ public class specNextFTC extends PedroOpMode {
     /** Lowest (First) Sample from the Spike Mark */
     private final Pose pickup1Pose = new Pose(10, 30, Math.toRadians(180));
 
-    private final Pose lineUpControl = new Pose (49.8,47.2,Math.toRadians(180));
-    private final Pose lineUp = new Pose(58,31,Math.toRadians(180));
-    private final Pose firstPush = new Pose(22,31, Math.toRadians(180));
+    private final Pose lineUpControl = new Pose (19,31,Math.toRadians(180));
+    private final Pose lineUp = new Pose(58,32,Math.toRadians(180));
+    private final Pose firstPush = new Pose(22,29, Math.toRadians(180));
     private final Pose goBackControl = new Pose(63.5,31.3, Math.toRadians(180));
     private final Pose goBack = new Pose(58,23, Math.toRadians(180));
-    private final Pose secondPush = new Pose(16, 19, Math.toRadians(180));
-    private final Pose goBack2 = new Pose(20,19, Math.toRadians(180));
-    private final Pose thirdPush = new Pose();
-    /** Middle (Second) Sample from the Spike Mark */
-    private final Pose pickup3Pose = new Pose(49, 125, Math.toRadians(90));
+    private final Pose secondPush = new Pose(16, 21, Math.toRadians(180));
 
-    /** Highest (Third) Sample from the Spike Mark */
-    private final Pose pickup2Pose = new Pose(40, 135, Math.toRadians(0));
+    private final Pose goBack2Control = new Pose(63.19464787788005,25.53755903031544, Math.toRadians(180));
+    private final Pose goBack2 = new Pose(58,12, Math.toRadians(180));
+    private final Pose thirdPush = new Pose(20, 12, Math.toRadians(180));
 
-    /** Park Pose for our robot, after we do all of the scoring. */
-    private final Pose parkPose = new Pose(63, 95, Math.toRadians(-90));
+    private final Pose goBack3 = new Pose(24,14.08, Math.toRadians(180));
 
-    /** Park Control Pose for our robot, this is used to manipulate the bezier curve that we will create for the parking.
-     * The Robot will not go to this pose, it is used a control point for our bezier curve. */
-    private final Pose parkControlPose = new Pose(69, 112, Math.toRadians(-90));
     private Path scorePreload, park;
     private PathChain grabPickup1, grabPickup2, grabPickup3, scorePickup1, scorePickup2, scorePickup3, pushChain;
 
@@ -78,12 +72,13 @@ public class specNextFTC extends PedroOpMode {
          * PathChains hold Path(s) within it and are able to hold their end point, meaning that they will holdPoint until another path is followed.
          * Here is a explanation of the difference between Paths and PathChains <https://pedropathing.com/commonissues/pathtopathchain.html> */
 
-        /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
+        // Scored preloaded block
         scorePreload = new Path(new BezierLine(new Point(startPose), new Point(scorePose)));
         scorePreload.setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading());
 
         /* Here is an example for Constant Interpolation
         scorePreload.setConstantInterpolation(startPose.getHeading()); */
+
 
         /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         grabPickup1 = follower.pathBuilder()
@@ -92,8 +87,8 @@ public class specNextFTC extends PedroOpMode {
                 .build();
 
         pushChain = follower.pathBuilder()
-                .addPath(new BezierCurve(new Point(pickup1Pose), new Point(lineUpControl), new Point(lineUp)))
-                .setLinearHeadingInterpolation(pickup1Pose.getHeading(), lineUp.getHeading())
+                .addPath(new BezierCurve(new Point(scorePose), new Point(lineUpControl), new Point(lineUp)))
+                .setLinearHeadingInterpolation(scorePose.getHeading(), lineUp.getHeading())
 
 
                 .addPath(new BezierLine(new Point(lineUp),new Point(firstPush)))
@@ -106,17 +101,22 @@ public class specNextFTC extends PedroOpMode {
                 .addPath(new BezierLine(new Point(goBack),new Point(secondPush)))
                 .setLinearHeadingInterpolation(goBack.getHeading(), secondPush.getHeading())
 
-                .addPath(new BezierLine(new Point(secondPush),new Point(goBack2)))
+                .addPath(new BezierCurve(new Point(secondPush), new Point(goBack2Control), new Point(goBack2)))
                 .setLinearHeadingInterpolation(secondPush.getHeading(), goBack2.getHeading())
 
+                .addPath(new BezierLine(new Point(goBack2),new Point(thirdPush)))
+                .setLinearHeadingInterpolation(goBack2.getHeading(), thirdPush.getHeading())
+
+                .addPath(new BezierLine(new Point(thirdPush),new Point(goBack3)))
+                .setLinearHeadingInterpolation(thirdPush.getHeading(), goBack3.getHeading())
 
 
                 .build();
 
         /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(secondPush), new Point(scorePose)))
-                .setLinearHeadingInterpolation(secondPush.getHeading(), scorePose.getHeading())
+                .addPath(new BezierLine(new Point(goBack3), new Point(scorePose)))
+                .setLinearHeadingInterpolation(goBack3.getHeading(), scorePose.getHeading())
                 .build();
 
 
@@ -152,22 +152,26 @@ public class specNextFTC extends PedroOpMode {
 
     public Command initRoutine() {
         return new SequentialGroup(
-                Claw.INSTANCE.close()
+                Claw.INSTANCE.close(),
+                Depo.INSTANCE.specDepo()
+                //new Lift.resetVerts()
+                //  Lift.INSTANCE.resetLeftSlide(),
+             //  Lift.INSTANCE.resetRightSlide()
         );
     }
     public Command preLoadRoutine() {
 
         return new SequentialGroup(
-               Depo.INSTANCE.resetDepo(),
-
         new ParallelGroup(
-                       // new FollowPath(scorePreload),
+                    // new FollowPath(scorePreload),
                         Depo.INSTANCE.specDepo(),
                         Lift.INSTANCE.specPos()
 
                         //Depo.
                 ),
-                new SequentialGroup(
+                new Delay(0.5),
+                new ParallelGroup(
+                    //    Lift.INSTANCE.holdSlides(),
                         Lift.INSTANCE.depoSpec(),
                         Claw.INSTANCE.open()
                 ),

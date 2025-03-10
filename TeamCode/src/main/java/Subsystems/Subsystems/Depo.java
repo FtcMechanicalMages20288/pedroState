@@ -73,9 +73,9 @@ public class Depo extends Subsystem {
 
     public Command specDepo() {
         Double rotate = 0.6;
-        Double rightTilt = 0.55;
-        Double leftTilt = 0.35;
-        Double extendDepo = 0.93;
+        Double rightTilt = 0.63;
+        Double leftTilt = 0.37;
+        Double extendDepo = .67;
         return new MultipleServosToSeperatePositions(
                 Map.of(
                         depoRight, rightTilt,
