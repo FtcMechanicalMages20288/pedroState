@@ -16,6 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
+import com.rowanmcalpin.nextftc.core.command.utility.delays.Delay;
 
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
@@ -61,23 +62,23 @@ public class specAutoPedro extends OpMode {
     private final Pose startPose = new Pose(9, 69, Math.toRadians(90));
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
-    private final Pose scorePose = new Pose(34, 69, Math.toRadians(180));
+    private final Pose scorePose = new Pose(33.5, 69, Math.toRadians(180));
 
     /** Lowest (First) Sample from the Spike Mark */
     private final Pose pickup1Pose = new Pose(10, 30, Math.toRadians(180));
 
-    private final Pose lineUpControl = new Pose (19,31,Math.toRadians(180));
+    private final Pose lineUpControl = new Pose (19,34,Math.toRadians(180));
     private final Pose lineUp = new Pose(58,32,Math.toRadians(180));
     private final Pose firstPush = new Pose(22,29, Math.toRadians(180));
-    private final Pose goBackControl = new Pose(63.5,31.3, Math.toRadians(180));
+    private final Pose goBackControl = new Pose(64,31.3, Math.toRadians(180));
     private final Pose goBack = new Pose(58,23, Math.toRadians(180));
-    private final Pose secondPush = new Pose(16, 21, Math.toRadians(180));
+    private final Pose secondPush = new Pose(20, 21, Math.toRadians(180));
 
     private final Pose goBack2Control = new Pose(63.19464787788005,25.53755903031544, Math.toRadians(180));
     private final Pose goBack2 = new Pose(58,12, Math.toRadians(180));
     private final Pose thirdPush = new Pose(20, 12, Math.toRadians(180));
 
-    private final Pose goBack3 = new Pose(24,14.08, Math.toRadians(180));
+    private final Pose goBack3 = new Pose(13,12, Math.toRadians(180));
 
 
     /** Middle (Second) Sample from the Spike Mark */
@@ -122,7 +123,7 @@ public class specAutoPedro extends OpMode {
         scorePreload = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(startPose), new Point(scorePose)))
 
-              .addParametricCallback(0.1, () -> slidesRun(850))
+              .addParametricCallback(0.1, () -> slidesRunUP(1150))
                 .addParametricCallback(0.1, this::specimenClip)
 
                 .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
@@ -157,7 +158,7 @@ public class specAutoPedro extends OpMode {
 
                 .addPath(new BezierCurve(new Point(secondPush), new Point(goBack2Control), new Point(goBack2)))
                 .setLinearHeadingInterpolation(secondPush.getHeading(), goBack2.getHeading())
-                .addParametricCallback(0.1, ()-> slidesRun(125))
+                .addParametricCallback(0.1, ()-> slidesRunUP(125))
 
                 .addPath(new BezierLine(new Point(goBack2),new Point(thirdPush)))
                 .addParametricCallback(0.1, this::pickupSpecimen)
@@ -222,15 +223,15 @@ public class specAutoPedro extends OpMode {
             case 21:
 
                 if(!follower.isBusy()){
-                    slidesRun(1600);//2
+                    slidesRunDown(-100);//function resets the tick count every time cause otherwise its cooked, idk y \ ALSO try a lower -negative number if its going too far lol
                     telemetry.addData("Slides: ", "Worked");
                     telemetry.update();
 
-                    if(!rightVerticalMotor.isBusy() && !follower.isBusy()){
-                        openClaw();
-                        setPathState(2);
-                    }
+                }
 
+                if(!rightVerticalMotor.isBusy() && !follower.isBusy()){
+                    openClaw();
+                    setPathState(2);
                 }
                 break;
 
@@ -271,7 +272,7 @@ public class specAutoPedro extends OpMode {
 
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
                     follower.followPath(pushChain,true);
-                    setPathState(-1); //3
+                    setPathState(3); //3
                 }
                 break;
 
@@ -280,10 +281,11 @@ public class specAutoPedro extends OpMode {
                 if(!follower.isBusy()) {
                     /* Grab Sample */
                     closeClaw();
+
                     specimenClip();
                     /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup1,true);
-                    setPathState(4);
+                    //follower.followPath(scorePickup1,true);
+                    //setPathState(4);
                 }
                 break;
 
@@ -407,22 +409,53 @@ public class specAutoPedro extends OpMode {
     public void stop() {
     }
 
-    public void slidesRun(int pos){
+    public void slidesRunUP(int pos){
+        leftVerticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightVerticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         leftVerticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightVerticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         leftVerticalMotor.setTargetPosition(pos);
         rightVerticalMotor.setTargetPosition(pos);
 
-        leftVerticalMotor.setPower(1);
-        rightVerticalMotor.setPower(1);
+
+            leftVerticalMotor.setPower(1);
+            rightVerticalMotor.setPower(1);
+
 
         leftVerticalMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         rightVerticalMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
 
 
+
+
     }
+    public void slidesRunDown(int pos){
+        leftVerticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightVerticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        leftVerticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        rightVerticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        leftVerticalMotor.setTargetPosition(pos);
+        rightVerticalMotor.setTargetPosition(pos);
+
+
+        leftVerticalMotor.setPower(-1);
+        rightVerticalMotor.setPower(-1);
+
+
+        leftVerticalMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightVerticalMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+
+
+
+    }
+
+
 
     public void depoReset(){
         depoLeft.setPosition(0.97);
@@ -472,6 +505,7 @@ public class specAutoPedro extends OpMode {
 
     public void closeClaw(){
         claw.setPosition(0.58);
+
     }
 
     public void openClaw() {
