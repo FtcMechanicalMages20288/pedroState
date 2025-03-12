@@ -68,18 +68,18 @@ public class SpecimenAutoStates extends OpMode {
 
     /** Lowest (First) Sample from the Spike Mark */
 
-    private final Pose pickup1Pose = new Pose(11.75, 35, Math.toRadians(180));
+        private final Pose pickup1Pose = new Pose(11.75, 35, Math.toRadians(180));
 
     private final Pose lineUpControl = new Pose (19,34,Math.toRadians(180));
-    private final Pose lineUp = new Pose(58,32,Math.toRadians(180));
+    private final Pose lineUp = new Pose(56,32,Math.toRadians(180)); //TODO set all the push block line ups to 58 again
     private final Pose firstPush = new Pose(22,29, Math.toRadians(180));
     private final Pose goBackControl = new Pose(64,31.3, Math.toRadians(180));
-    private final Pose goBack = new Pose(58,23, Math.toRadians(180));
+    private final Pose goBack = new Pose(56,23, Math.toRadians(180));
     private final Pose secondPush = new Pose(20, 21, Math.toRadians(180));
 
     private final Pose goBack2Control = new Pose(63.19464787788005,25.53755903031544, Math.toRadians(180));
-    private final Pose goBack2 = new Pose(58,12, Math.toRadians(180));
-    private final Pose thirdPush = new Pose(20, 12, Math.toRadians(180));
+    private final Pose goBack2 = new Pose(56,12, Math.toRadians(180));
+    private final Pose thirdPush = new Pose(13, 12, Math.toRadians(180)); //try 15 for x to go faster
 
     private final Pose goBack3 = new Pose(11.5,12, Math.toRadians(180));
 
@@ -169,10 +169,6 @@ public class SpecimenAutoStates extends OpMode {
 
 
         /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        grabPickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
-                .build();
 
 
 
@@ -185,7 +181,7 @@ public class SpecimenAutoStates extends OpMode {
                 .addParametricCallback(0.05, this::  intermediateArmPosition)
                 .addParametricCallback(0.05, () -> slidesRunUP(1300))
               //  .addParametricCallback(0.11, this::intermediateArmPosition)
-                .addParametricCallback(0.95, ()-> slidesDownTime(0.3))
+                .addParametricCallback(0.95, ()-> slidesDownTime(0.45)) //TODO change back to 3 if too slow
                 .addParametricCallback(0.8, this::  specimenClip)
                 .addParametricCallback(1, this::openClaw)
                 .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
@@ -199,11 +195,7 @@ public class SpecimenAutoStates extends OpMode {
 
 
 
-        /* This is our grabPickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        grabPickup2 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
-                .build();
+
 
         /* This is our scorePickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup2 = follower.pathBuilder()
@@ -212,7 +204,7 @@ public class SpecimenAutoStates extends OpMode {
                 .addParametricCallback(0.05, this::  specimenClip)
                 .addParametricCallback(0.05, () -> slidesRunUP(1400))
                 //  .addParametricCallback(0.11, this::intermediateArmPosition)
-                .addParametricCallback(0.87, ()-> slidesDownTime(0.3))
+                .addParametricCallback(0.87, ()-> slidesDownTime(0.45))
                 .addParametricCallback(1, this::openClaw)
                 .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
                 .addParametricCallback(0.1, this::depoReset)
@@ -223,10 +215,7 @@ public class SpecimenAutoStates extends OpMode {
                 .build();
 
         /* This is our grabPickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
-                .build();
+
 
         /* This is our scorePickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup3 = follower.pathBuilder()
@@ -235,7 +224,7 @@ public class SpecimenAutoStates extends OpMode {
                 .addParametricCallback(0.05, this::  specimenClip)
                 .addParametricCallback(0.05, () -> slidesRunUP(1400))
                 //  .addParametricCallback(0.11, this::intermediateArmPosition)
-                .addParametricCallback(0.87, ()-> slidesDownTime(0.3))
+                .addParametricCallback(0.87, ()-> slidesDownTime(0.45))
                 .addParametricCallback(1, this::openClaw)
                 .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
                 .addParametricCallback(0.1, this::depoReset)
@@ -251,7 +240,7 @@ public class SpecimenAutoStates extends OpMode {
                 .addParametricCallback(0.05, this::  specimenClip)
                 .addParametricCallback(0.1, () -> slidesRunUP(1400))
                 //  .addParametricCallback(0.11, this::intermediateArmPosition)
-                .addParametricCallback(0.87, ()-> slidesDownTime(0.3))
+                .addParametricCallback(0.87, ()-> slidesDownTime(0.45))
                 .addParametricCallback(1, this::openClaw)
                 .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
                 .addParametricCallback(0.1, this::depoReset)
@@ -415,7 +404,7 @@ public class SpecimenAutoStates extends OpMode {
         depoLeft.setPosition(0.97);
         depoRight.setPosition(0.03);
         extendDepo.setPosition(0.71);
-        wristClaw.setPosition(0.6);
+        wristClaw.setPosition(0.45);
 
 
         leftVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -529,6 +518,27 @@ public class SpecimenAutoStates extends OpMode {
 
         rightVerticalMotor.setDirection(DcMotor.Direction.REVERSE);
 
+    }
+
+    private void tangentialSplineScore(){
+        //new BezierCurve(
+        //          new Point(34.300, 69.000, Point.CARTESIAN),
+        //          new Point(29.728, 69.351, Point.CARTESIAN),
+        //          new Point(29.212, 35.227, Point.CARTESIAN),
+        //          new Point(11.750, 35.000, Point.CARTESIAN)
+        //        )
+        //      )
+        //      .setTangentHeadingInterpolation();
+    }
+    private void tangentSplineToStopScore(){
+      //new BezierCurve(
+        //          new Point(34.300, 69.000, Point.CARTESIAN),
+        //          new Point(18.387, 68.391, Point.CARTESIAN),
+        //          new Point(32.134, 35.227, Point.CARTESIAN),
+        //          new Point(11.750, 35.000, Point.CARTESIAN)
+        //        )
+        //      )
+        //      .setTangentHeadingInterpolation();
     }
 
 
