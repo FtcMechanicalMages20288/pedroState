@@ -62,7 +62,7 @@ public class specAutoPedro extends OpMode {
     private final Pose startPose = new Pose(9, 69, Math.toRadians(90));
 
     /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
-    private final Pose scorePose = new Pose(33.5, 69, Math.toRadians(180));
+    private final Pose scorePose = new Pose(34.5, 69, Math.toRadians(180));
 
     /** Lowest (First) Sample from the Spike Mark */
     private final Pose pickup1Pose = new Pose(10, 30, Math.toRadians(180));
@@ -123,8 +123,8 @@ public class specAutoPedro extends OpMode {
         scorePreload = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(startPose), new Point(scorePose)))
 
-              .addParametricCallback(0.1, () -> slidesRunUP(1150))
-                .addParametricCallback(0.1, this::specimenClip)
+                .addParametricCallback(0.1, () -> slidesRunUP(1150))
+                .addParametricCallback(0.1, this::  specimenClip)
 
                 .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
                 .build();
@@ -142,7 +142,7 @@ public class specAutoPedro extends OpMode {
         pushChain = follower.pathBuilder()
                 .addPath(new BezierCurve(new Point(scorePose), new Point(lineUpControl), new Point(lineUp)))
                 .addParametricCallback(0.05, this::depoReset)
-                .addParametricCallback(0.6, this::depoStop)
+                .addParametricCallback(0.4, this::depoStop)
                 .setLinearHeadingInterpolation(scorePose.getHeading(), lineUp.getHeading())
 
 
@@ -223,15 +223,12 @@ public class specAutoPedro extends OpMode {
             case 21:
 
                 if(!follower.isBusy()){
-                    slidesRunDown(-100);//function resets the tick count every time cause otherwise its cooked, idk y \ ALSO try a lower -negative number if its going too far lol
-                    telemetry.addData("Slides: ", "Worked");
-                    telemetry.update();
-
+                    slidesDownTime(.3); //.75 seconds
                 }
 
                 if(!rightVerticalMotor.isBusy() && !follower.isBusy()){
                     openClaw();
-                    setPathState(2);
+                    setPathState(-1);
                 }
                 break;
 
@@ -432,23 +429,17 @@ public class specAutoPedro extends OpMode {
 
 
     }
-    public void slidesRunDown(int pos){
-        leftVerticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightVerticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    public void slidesDownTime(double time){
+        long timer = opmodeTimer.getElapsedTime();
+        leftVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        while((timer+time*1000) >  opmodeTimer.getElapsedTime()){
+            leftVerticalMotor.setPower(-1);
+            rightVerticalMotor.setPower(-1);
 
-        leftVerticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightVerticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        leftVerticalMotor.setTargetPosition(pos);
-        rightVerticalMotor.setTargetPosition(pos);
-
-
-        leftVerticalMotor.setPower(-1);
-        rightVerticalMotor.setPower(-1);
-
-
-        leftVerticalMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        rightVerticalMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            telemetry.addData("Slides Timer: ", opmodeTimer.getElapsedTime());
+            telemetry.update();
+        }
 
 
 
@@ -463,20 +454,16 @@ public class specAutoPedro extends OpMode {
         extendDepo.setPosition(0.71);
         wristClaw.setPosition(0.6);
 
-        if(!hortSwitch.isPressed()) {
+
             leftVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             rightVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             leftVerticalMotor.setPower(-1);
             rightVerticalMotor.setPower(-1);
         }
-      else{
-          leftVerticalMotor.setPower(0);
-          rightVerticalMotor.setPower(0);
-
-        }
 
 
-    }
+
+
 
     public void depoStop(){
         leftVerticalMotor.setPower(0);
@@ -491,7 +478,7 @@ public class specAutoPedro extends OpMode {
         depoLeft.setPosition(0.97);
         depoRight.setPosition(0.03);
         extendDepo.setPosition(0.4);
-        wristClaw.setPosition(0.6);
+        wristClaw.setPosition(1);
 
     }
 
@@ -500,7 +487,9 @@ public class specAutoPedro extends OpMode {
         depoLeft.setPosition(0.37);
         depoRight.setPosition(0.63);
         extendDepo.setPosition(.67);
-        wristClaw.setPosition(0.6);
+        wristClaw.setPosition(1); // servo facin up on rotation
+        // servo facin down   wristClaw.setPosition(0.45);
+
     }
 
     public void closeClaw(){
