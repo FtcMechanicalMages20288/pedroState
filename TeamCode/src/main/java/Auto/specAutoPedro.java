@@ -123,7 +123,7 @@ public class specAutoPedro extends OpMode {
         scorePreload = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(startPose), new Point(scorePose)))
 
-                .addParametricCallback(0.1, () -> slidesRunUP(1150))
+                .addParametricCallback(0.1, () -> slidesRunUP(1400))
                 .addParametricCallback(0.1, this::  specimenClip)
 
                 .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
@@ -141,8 +141,8 @@ public class specAutoPedro extends OpMode {
 
         pushChain = follower.pathBuilder()
                 .addPath(new BezierCurve(new Point(scorePose), new Point(lineUpControl), new Point(lineUp)))
-                .addParametricCallback(0.05, this::depoReset)
-                .addParametricCallback(0.4, this::depoStop)
+                .addParametricCallback(0.05, this::depoResetNOSlide)
+               // .addParametricCallback(0.4, this::depoStop)
                 .setLinearHeadingInterpolation(scorePose.getHeading(), lineUp.getHeading())
 
 
@@ -215,7 +215,7 @@ public class specAutoPedro extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload,true);
-               setPathState(21);
+                setPathState(21);
                 break;
 
                 //Pickup1 is skipped until the pushChain
@@ -223,12 +223,12 @@ public class specAutoPedro extends OpMode {
             case 21:
 
                 if(!follower.isBusy()){
-                    slidesDownTime(.3); //.75 seconds
+                    slidesDownTime(0.3); //.75 seconds
                 }
 
                 if(!rightVerticalMotor.isBusy() && !follower.isBusy()){
                     openClaw();
-                    setPathState(-1);
+                    setPathState(2);
                 }
                 break;
 
@@ -461,6 +461,19 @@ public class specAutoPedro extends OpMode {
             rightVerticalMotor.setPower(-1);
         }
 
+    public void depoResetNOSlide() {
+        depoLeft.setPosition(0.97);
+        depoRight.setPosition(0.03);
+        extendDepo.setPosition(0.71);
+        wristClaw.setPosition(0.6);
+
+
+        leftVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftVerticalMotor.setPower(0);
+        rightVerticalMotor.setPower(0);
+
+    }
 
 
 
@@ -484,8 +497,8 @@ public class specAutoPedro extends OpMode {
 
 
     public void specimenClip(){
-        depoLeft.setPosition(0.37);
-        depoRight.setPosition(0.63);
+        depoLeft.setPosition(0.3);
+        depoRight.setPosition(0.7);
         extendDepo.setPosition(.67);
         wristClaw.setPosition(1); // servo facin up on rotation
         // servo facin down   wristClaw.setPosition(0.45);
