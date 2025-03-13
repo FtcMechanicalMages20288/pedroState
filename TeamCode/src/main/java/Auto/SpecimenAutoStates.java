@@ -336,6 +336,7 @@ public class SpecimenAutoStates extends OpMode {
         follower.setStartingPose(startPose);
         buildPaths();
         closeClaw();
+        intakeTilt.setPosition(0.65);
 
 
     }
