@@ -40,7 +40,9 @@ public class SpecimenAutoStates extends OpMode {
     private TouchSensor vertSwitch, hortSwitch;
     private ColorSensor colorChute;
     private boolean slidesOff = false;
+    private boolean timerCondition = false;
 
+    long currentTimer;
 
 
     private Follower follower;
@@ -62,27 +64,27 @@ public class SpecimenAutoStates extends OpMode {
     /** Start Pose of our robot */
     private final Pose startPose = new Pose(9, 69, Math.toRadians(90));
 
-    /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
+    /** Scoring Pose of our robot.  */
     private final Pose scorePose = new Pose(34.3, 69, Math.toRadians(180));
     private final Pose scorePoseSpeed = new Pose(34.3, 68.5, Math.toRadians(180));
 
-    /** Lowest (First) Sample from the Spike Mark */
-
-        private final Pose pickup1Pose = new Pose(11.75, 35, Math.toRadians(180));
-
-    private final Pose lineUpControl = new Pose (19,34,Math.toRadians(180));
-    private final Pose lineUp = new Pose(56,32,Math.toRadians(180)); //TODO set all the push block line ups to 58 again
-    private final Pose firstPush = new Pose(22,29, Math.toRadians(180));
+    /** Push the samples on the ground**/
+    private final Pose lineUpControl = new Pose (19,36,Math.toRadians(180));
+    private final Pose lineUp = new Pose(54,32.5,Math.toRadians(180));
+    private final Pose firstPush = new Pose(22,27, Math.toRadians(180));
     private final Pose goBackControl = new Pose(64,31.3, Math.toRadians(180));
-    private final Pose goBack = new Pose(56,23, Math.toRadians(180));
+    private final Pose goBack = new Pose(54,23, Math.toRadians(180));
     private final Pose secondPush = new Pose(20, 21, Math.toRadians(180));
 
     private final Pose goBack2Control = new Pose(63.19464787788005,25.53755903031544, Math.toRadians(180));
-    private final Pose goBack2 = new Pose(56,12, Math.toRadians(180));
-    private final Pose thirdPush = new Pose(13, 12, Math.toRadians(180)); //try 15 for x to go faster
+    private final Pose goBack2 = new Pose(54,12, Math.toRadians(180));
+    private final Pose thirdPush = new Pose(20, 12, Math.toRadians(180)); //try 15 for x to go faster
 
-    private final Pose goBack3 = new Pose(11.5,12, Math.toRadians(180));
+    private final Pose goBack3 = new Pose(14.3,12, Math.toRadians(180));
 
+
+    /** Block pickup pose**/
+    private final Pose pickup1Pose = new Pose(11.75, 35, Math.toRadians(180));
 
     /** Middle (Second) Sample from the Spike Mark */
     private final Pose pickup3Pose = new Pose(49, 125, Math.toRadians(90));
@@ -129,7 +131,7 @@ public class SpecimenAutoStates extends OpMode {
 
                 .addParametricCallback(0.1, () -> slidesRunUP(1400))
                 .addParametricCallback(0.1, this::  specimenClip)
-                .addParametricCallback(0.94, ()-> slidesDownTime(0.3))
+                .addParametricCallback(0.89, ()-> slidesDownTime(0.3))
                 .addParametricCallback(1, this::openClaw)
                 .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
 
@@ -140,12 +142,17 @@ public class SpecimenAutoStates extends OpMode {
                 .setLinearHeadingInterpolation(scorePose.getHeading(), lineUp.getHeading())
 
 
-                .addPath(new BezierLine(new Point(lineUp),new Point(firstPush)))
-                .setLinearHeadingInterpolation(lineUp.getHeading(), firstPush.getHeading())
-
-
-                .addPath(new BezierCurve(new Point(firstPush), new Point(goBackControl), new Point(goBack)) )
-                .setLinearHeadingInterpolation(firstPush.getHeading(), goBack.getHeading())
+                //FINDS THE SHORTEST LINE BETWEEN THE TWO POINTS
+                .addPath(new BezierLine(new Point(lineUp)
+                        ,new Point(firstPush)))
+                .setLinearHeadingInterpolation(lineUp.getHeading()
+                        , firstPush.getHeading())
+                //FINDS THE CLOSEST PATH TO THE END POINT
+                // WHILE GOING AROUND CONTROL POINT
+                .addPath(new BezierCurve(new Point(firstPush),
+                        new Point(goBackControl), new Point(goBack)) )
+                .setLinearHeadingInterpolation(firstPush.getHeading(),
+                        goBack.getHeading())
 
                 .addPath(new BezierLine(new Point(goBack),new Point(secondPush)))
                 .setLinearHeadingInterpolation(goBack.getHeading(), secondPush.getHeading())
@@ -178,7 +185,7 @@ public class SpecimenAutoStates extends OpMode {
 
                 .addPath(new BezierLine(new Point(goBack3), new Point(scorePose)))
                 .setLinearHeadingInterpolation(goBack3.getHeading(), scorePose.getHeading())
-                .addParametricCallback(0.05, this::  intermediateArmPosition)
+              //3  .addParametricCallback(0.05, this::  intermediateArmPosition)
                 .addParametricCallback(0.05, () -> slidesRunUP(1300))
               //  .addParametricCallback(0.11, this::intermediateArmPosition)
                 .addParametricCallback(0.95, ()-> slidesDownTime(0.45)) //TODO change back to 3 if too slow
@@ -267,7 +274,18 @@ public class SpecimenAutoStates extends OpMode {
 
             case 1:
                 if(!follower.isBusy()){
+
+                    if(!timerCondition) {
+                         currentTimer = opmodeTimer.getElapsedTime();
+                         timerCondition = true;
+                     }
+
+                    while(currentTimer + 800 > opmodeTimer.getElapsedTime()) {
+
+                   }
                     closeClaw();
+                    intermediateArmPosition();
+
                     follower.followPath(scorePickup1);
                     setPathState(2);
                 }
@@ -461,6 +479,15 @@ public class SpecimenAutoStates extends OpMode {
 
 
     public void specimenClip(){
+        depoLeft.setPosition(0.3);
+        depoRight.setPosition(0.7);
+        extendDepo.setPosition(.67);
+        wristClaw.setPosition(1); // servo facin up on rotation
+        // servo facin down   wristClaw.setPosition(0.45);
+
+    }
+
+    public void specimenClipFirst(){
         depoLeft.setPosition(0.3);
         depoRight.setPosition(0.7);
         extendDepo.setPosition(.67);

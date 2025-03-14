@@ -31,7 +31,7 @@ import pedroPathing.constants.LConstants;
  * @version 2.0, 11/28/2024
  */
 
-@Autonomous(name = "Specimen Auto Pedro", group = "Examples")
+@Autonomous(name = "Specimen Auto Pedro")
 public class specAutoPedro extends OpMode {
 
     private DcMotor frontLeft, backLeft, frontRight, backRight, extension;
@@ -62,26 +62,27 @@ public class specAutoPedro extends OpMode {
     /** Start Pose of our robot */
     private final Pose startPose = new Pose(9, 69, Math.toRadians(90));
 
-    /** Scoring Pose of our robot. It is facing the submersible at a -45 degree (315 degree) angle. */
-    private final Pose scorePose = new Pose(36.5, 69, Math.toRadians(180));
-    private final Pose scorePoseSpeed = new Pose(36.5, 68.5, Math.toRadians(180));
+    /** Scoring Pose of our robot.  */
+    private final Pose scorePose = new Pose(34.3, 69, Math.toRadians(180));
+    private final Pose scorePoseSpeed = new Pose(34.3, 68.5, Math.toRadians(180));
 
-    /** Lowest (First) Sample from the Spike Mark */
-    private final Pose pickup1Pose = new Pose(10, 30, Math.toRadians(180));
-
+    /** Push the samples on the ground**/
     private final Pose lineUpControl = new Pose (19,34,Math.toRadians(180));
-    private final Pose lineUp = new Pose(58,32,Math.toRadians(180));
-    private final Pose firstPush = new Pose(22,29, Math.toRadians(180));
+    private final Pose lineUp = new Pose(56,32,Math.toRadians(180));
+    private final Pose firstPush = new Pose(22,27.5, Math.toRadians(180));
     private final Pose goBackControl = new Pose(64,31.3, Math.toRadians(180));
-    private final Pose goBack = new Pose(58,23, Math.toRadians(180));
+    private final Pose goBack = new Pose(56,23, Math.toRadians(180));
     private final Pose secondPush = new Pose(20, 21, Math.toRadians(180));
 
     private final Pose goBack2Control = new Pose(63.19464787788005,25.53755903031544, Math.toRadians(180));
-    private final Pose goBack2 = new Pose(58,12, Math.toRadians(180));
-    private final Pose thirdPush = new Pose(20, 12, Math.toRadians(180));
+    private final Pose goBack2 = new Pose(56,12, Math.toRadians(180));
+    private final Pose thirdPush = new Pose(13, 12, Math.toRadians(180)); //try 15 for x to go faster
 
     private final Pose goBack3 = new Pose(11.5,12, Math.toRadians(180));
 
+
+    /** Block pickup pose**/
+    private final Pose pickup1Pose = new Pose(11.75, 35, Math.toRadians(180));
 
     /** Middle (Second) Sample from the Spike Mark */
     private final Pose pickup3Pose = new Pose(49, 125, Math.toRadians(90));
@@ -98,7 +99,7 @@ public class specAutoPedro extends OpMode {
 
     /* These are our Paths and PathChains that we will define in buildPaths() */
     private Path  park;
-    private PathChain scorePreload, grabPickup1, grabPickup2, grabPickup3, scorePickup1, scorePickup2, scorePickup3, pushChain;
+    private PathChain scorePreload, grabPickup1, grabPickup2, grabPickup3, scorePickup1, scorePickup2, scorePickup3, scorePickup4,  pushChain;
 
     /** Build the paths for the auto (adds, for example, constant/linear headings while doing paths)
      * It is necessary to do this so that all the paths are built before the auto starts. **/
@@ -123,37 +124,33 @@ public class specAutoPedro extends OpMode {
 
         // Scored preloaded block
         scorePreload = follower.pathBuilder()
+                //TODO Score Preload
                 .addPath(new BezierLine(new Point(startPose), new Point(scorePose)))
 
                 .addParametricCallback(0.1, () -> slidesRunUP(1400))
                 .addParametricCallback(0.1, this::  specimenClip)
-                .addParametricCallback(0.94, ()-> slidesDownTime(0.1))
+                .addParametricCallback(0.92, ()-> slidesDownTime(0.3))
+                .addParametricCallback(1, this::openClaw)
                 .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
-                .build();
 
-        /* Here is an example for Constant Interpolation
-        scorePreload.setConstantInterpolation(startPose.getHeading()); */
-
-
-        /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        grabPickup1 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
-                .build();
-
-        pushChain = follower.pathBuilder()
+                //TODO 3 push chain and pickup
                 .addPath(new BezierCurve(new Point(scorePose), new Point(lineUpControl), new Point(lineUp)))
                 .addParametricCallback(0.05, this::depoReset)
-                .addParametricCallback(0.2, this::depoStop)
+                .addParametricCallback(0.14, this::depoStop)
                 .setLinearHeadingInterpolation(scorePose.getHeading(), lineUp.getHeading())
 
 
-                .addPath(new BezierLine(new Point(lineUp),new Point(firstPush)))
-                .setLinearHeadingInterpolation(lineUp.getHeading(), firstPush.getHeading())
-
-
-                .addPath(new BezierCurve(new Point(firstPush), new Point(goBackControl), new Point(goBack)) )
-                .setLinearHeadingInterpolation(firstPush.getHeading(), goBack.getHeading())
+                //FINDS THE SHORTEST LINE BETWEEN THE TWO POINTS
+                .addPath(new BezierLine(new Point(lineUp)
+                        ,new Point(firstPush)))
+                .setLinearHeadingInterpolation(lineUp.getHeading()
+                        , firstPush.getHeading())
+                //FINDS THE CLOSEST PATH TO THE END POINT
+                // WHILE GOING AROUND CONTROL POINT
+                .addPath(new BezierCurve(new Point(firstPush),
+                        new Point(goBackControl), new Point(goBack)) )
+                .setLinearHeadingInterpolation(firstPush.getHeading(),
+                        goBack.getHeading())
 
                 .addPath(new BezierLine(new Point(goBack),new Point(secondPush)))
                 .setLinearHeadingInterpolation(goBack.getHeading(), secondPush.getHeading())
@@ -167,49 +164,95 @@ public class specAutoPedro extends OpMode {
                 .setLinearHeadingInterpolation(goBack2.getHeading(), thirdPush.getHeading())
 
                 .addPath(new BezierLine(new Point(thirdPush),new Point(goBack3)))
-
                 .setLinearHeadingInterpolation(thirdPush.getHeading(), goBack3.getHeading())
 
 
                 .build();
 
+        /* Here is an example for Constant Interpolation
+        scorePreload.setConstantInterpolation(startPose.getHeading()); */
+
+
+        /* This is our grabPickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
+
+
+
         /* This is our scorePickup1 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup1 = follower.pathBuilder()
+                //TODO Score 1
+
                 .addPath(new BezierLine(new Point(goBack3), new Point(scorePose)))
                 .setLinearHeadingInterpolation(goBack3.getHeading(), scorePose.getHeading())
-                .addParametricCallback(0.1, () -> slidesRunUP(1400))
-                .addParametricCallback(0.11, this::intermediateArmPosition)
-                .addParametricCallback(0.87, this::  specimenClip)
-                .addParametricCallback(0.90, ()-> slidesDownTime(0.1))
+                .addParametricCallback(0.05, this::  intermediateArmPosition)
+                .addParametricCallback(0.05, () -> slidesRunUP(1300))
+                //  .addParametricCallback(0.11, this::intermediateArmPosition)
+                .addParametricCallback(0.95, ()-> slidesDownTime(0.45)) //TODO change back to 3 if too slow
+                .addParametricCallback(0.8, this::  specimenClip)
                 .addParametricCallback(1, this::openClaw)
-               // .addPath(new BezierLine(new Point(scorePose), new Point(scorePoseSpeed)))
-               // .setLinearHeadingInterpolation(scorePose.getHeading(), scorePoseSpeed.getHeading())
-                .build();
-
-
-
-        /* This is our grabPickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        grabPickup2 = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
+                .addParametricCallback(0.1, this::depoReset)
+                .addParametricCallback(0.3, this::depoStop)
+                .addParametricCallback(0.4,() -> slidesRunUP(125))
+                .addParametricCallback(0.6, this::pickupSpecimen)
                 .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
+
                 .build();
+
+
+
+
 
         /* This is our scorePickup2 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup2 = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(pickup1Pose), new Point(scorePose)))
                 .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+                .addParametricCallback(0.05, this::  specimenClip)
+                .addParametricCallback(0.05, () -> slidesRunUP(1400))
+                //  .addParametricCallback(0.11, this::intermediateArmPosition)
+                .addParametricCallback(0.87, ()-> slidesDownTime(0.45))
+                .addParametricCallback(1, this::openClaw)
+                .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
+                .addParametricCallback(0.1, this::depoReset)
+                .addParametricCallback(0.3, this::depoStop)
+                .addParametricCallback(0.4,() -> slidesRunUP(125))
+                .addParametricCallback(0.6, this::pickupSpecimen)
+                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
                 .build();
 
         /* This is our grabPickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
-        grabPickup3 = follower.pathBuilder()
-                .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
-                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
-                .build();
+
 
         /* This is our scorePickup3 PathChain. We are using a single path with a BezierLine, which is a straight line. */
         scorePickup3 = follower.pathBuilder()
                 .addPath(new BezierLine(new Point(pickup1Pose), new Point(scorePose)))
                 .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+                .addParametricCallback(0.05, this::  specimenClip)
+                .addParametricCallback(0.05, () -> slidesRunUP(1400))
+                //  .addParametricCallback(0.11, this::intermediateArmPosition)
+                .addParametricCallback(0.87, ()-> slidesDownTime(0.45))
+                .addParametricCallback(1, this::openClaw)
+                .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
+                .addParametricCallback(0.1, this::depoReset)
+                .addParametricCallback(0.3, this::depoStop)
+                .addParametricCallback(0.4,() -> slidesRunUP(125))
+                .addParametricCallback(0.6, this::pickupSpecimen)
+                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
+                .build();
+
+        scorePickup4 = follower.pathBuilder()
+                .addPath(new BezierLine(new Point(pickup1Pose), new Point(scorePose)))
+                .setLinearHeadingInterpolation(pickup1Pose.getHeading(), scorePose.getHeading())
+                .addParametricCallback(0.05, this::  specimenClip)
+                .addParametricCallback(0.1, () -> slidesRunUP(1400))
+                //  .addParametricCallback(0.11, this::intermediateArmPosition)
+                .addParametricCallback(0.87, ()-> slidesDownTime(0.45))
+                .addParametricCallback(1, this::openClaw)
+                .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
+                .addParametricCallback(0.1, this::depoReset)
+                .addParametricCallback(0.3, this::depoStop)
+                .addParametricCallback(0.4,() -> slidesRunUP(125))
+                .addParametricCallback(0.6, this::pickupSpecimen)
+                .setLinearHeadingInterpolation(scorePose.getHeading(), pickup1Pose.getHeading())
                 .build();
 
         /* This is our park path. We are using a BezierCurve with 3 points, which is a curved line that is curved based off of the control point */
@@ -224,133 +267,37 @@ public class specAutoPedro extends OpMode {
         switch (pathState) {
             case 0:
                 follower.followPath(scorePreload,true);
-                setPathState(21);
+                setPathState(1);
                 break;
+
+            case 1:
+                if(!follower.isBusy()){
+                    closeClaw();
+                    follower.followPath(scorePickup1);
+                    setPathState(2);
+                }
+            case 2:
+                if(!follower.isBusy()){
+                    closeClaw();
+                    follower.followPath(scorePickup2);
+                    setPathState(3);
+                }
+            case 3:
+                if(!follower.isBusy()){
+                    closeClaw();
+                    follower.followPath(scorePickup3);
+                    setPathState(4);
+                }
+            case 4:
+                if(!follower.isBusy()){
+                    closeClaw();
+                    follower.followPath(scorePickup4);
+                    setPathState(-1);
+                }
+
 
                 //Pickup1 is skipped until the pushChain
 
-            case 21:
-
-                if(!follower.isBusy()){
-                    //slidesDownTime(0.3); //.75 seconds
-                }
-
-                if(!rightVerticalMotor.isBusy() && !follower.isBusy()){
-                    openClaw();
-                    setPathState(2);
-                }
-                break;
-
-
-
-            case 1:
-
-                /* You could check for
-                - Follower State: "if(!follower.isBusy() {}"
-                - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
-                - Robot Position: "if(follower.getPose().getX() > 36) {}"
-                */
-
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Preload */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(grabPickup1,true);
-                    setPathState(2);
-                }
-                break;
-
-            case 2:
-
-                /* You could check for
-                - Follower State: "if(!follower.isBusy() {}"
-                - Time: "if(pathTimer.getElapsedTimeSeconds() > 1) {}"
-                - Robot Position: "if(follower.getPose().getX() > 36) {}"
-                */
-
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Preload */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(pushChain,true);
-                    setPathState(3); //3
-                }
-                break;
-
-            case 3:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup1Pose's position */
-                if(!follower.isBusy()) {
-                    /* Grab Sample */
-                    closeClaw();
-
-                    specimenClip();
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    //follower.followPath(scorePickup1,true);
-                    setPathState(4);
-                }
-                break;
-
-            case 4:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(scorePickup1,true);
-                    setPathState(-1);
-                }
-                break;
-            case 5:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup2Pose's position */
-                if(!follower.isBusy()) {
-                    /* Grab Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(grabPickup2,true);
-                    setPathState(6);
-                }
-                break;
-            case 6:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are grabbing the sample */
-                    follower.followPath(scorePickup2,true);
-                    setPathState(7);
-                }
-                break;
-            case 7:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the pickup3Pose's position */
-                if(!follower.isBusy()) {
-                    /* Grab Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are scoring the sample */
-                    follower.followPath(scorePickup3, true);
-                    setPathState(8);
-                }
-                break;
-            case 8:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Score Sample */
-
-                    /* Since this is a pathChain, we can have Pedro hold the end point while we are parked */
-                    follower.followPath(park,true);
-                    setPathState(9);
-                }
-                break;
-            case 9:
-                /* This case checks the robot's position and will wait until the robot position is close (1 inch away) from the scorePose's position */
-                if(!follower.isBusy()) {
-                    /* Level 1 Ascent */
-
-                    /* Set the state to a Case we won't use or define, so it just stops running an new paths */
-                    setPathState(-1);
-                }
-                break;
         }
     }
 
@@ -394,6 +341,7 @@ public class specAutoPedro extends OpMode {
         follower.setStartingPose(startPose);
         buildPaths();
         closeClaw();
+        intakeTilt.setPosition(0.65);
 
 
     }
@@ -426,8 +374,8 @@ public class specAutoPedro extends OpMode {
         rightVerticalMotor.setTargetPosition(pos);
 
 
-            leftVerticalMotor.setPower(1);
-            rightVerticalMotor.setPower(1);
+        leftVerticalMotor.setPower(1);
+        rightVerticalMotor.setPower(1);
 
 
         leftVerticalMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -462,14 +410,14 @@ public class specAutoPedro extends OpMode {
         depoLeft.setPosition(0.97);
         depoRight.setPosition(0.03);
         extendDepo.setPosition(0.71);
-        wristClaw.setPosition(0.6);
+        wristClaw.setPosition(0.45);
 
 
-            leftVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            rightVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            leftVerticalMotor.setPower(-1);
-            rightVerticalMotor.setPower(-1);
-        }
+        leftVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftVerticalMotor.setPower(-1);
+        rightVerticalMotor.setPower(-1);
+    }
 
     public void depoResetNOSlide() {
         depoLeft.setPosition(0.97);
@@ -526,10 +474,20 @@ public class specAutoPedro extends OpMode {
 
     }
 
-    public void closeClaw(){
-        claw.setPosition(0.58);
+    public void specimenClipFirst(){
+        depoLeft.setPosition(0.3);
+        depoRight.setPosition(0.7);
+        extendDepo.setPosition(.67);
+        wristClaw.setPosition(1); // servo facin up on rotation
+        // servo facin down   wristClaw.setPosition(0.45);
 
     }
+
+    public void closeClaw(){
+        claw.setPosition(0.58);
+    }
+
+
 
     public void openClaw() {
         claw.setPosition(0.48);
@@ -575,6 +533,27 @@ public class specAutoPedro extends OpMode {
 
         rightVerticalMotor.setDirection(DcMotor.Direction.REVERSE);
 
+    }
+
+    private void tangentialSplineScore(){
+        //new BezierCurve(
+        //          new Point(34.300, 69.000, Point.CARTESIAN),
+        //          new Point(29.728, 69.351, Point.CARTESIAN),
+        //          new Point(29.212, 35.227, Point.CARTESIAN),
+        //          new Point(11.750, 35.000, Point.CARTESIAN)
+        //        )
+        //      )
+        //      .setTangentHeadingInterpolation();
+    }
+    private void tangentSplineToStopScore(){
+        //new BezierCurve(
+        //          new Point(34.300, 69.000, Point.CARTESIAN),
+        //          new Point(18.387, 68.391, Point.CARTESIAN),
+        //          new Point(32.134, 35.227, Point.CARTESIAN),
+        //          new Point(11.750, 35.000, Point.CARTESIAN)
+        //        )
+        //      )
+        //      .setTangentHeadingInterpolation();
     }
 
 
