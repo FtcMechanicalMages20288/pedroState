@@ -11,9 +11,9 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 
-@TeleOp(name = "Thanos Drive")
+@TeleOp(name = "arm Intake test")
 
-public class LeagueQualDrive extends LinearOpMode {
+public class armNintake extends LinearOpMode {
 
     //DEFINING VARIABLES
 
@@ -109,220 +109,36 @@ public class LeagueQualDrive extends LinearOpMode {
         leftVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         rightVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-
-
         //turn on color sensor light
-        intakeColorSensor.enableLed(true);
-
-
-        intakeDown();
-        //hangersUp();
-        intakeStopper.setPosition(0);
-
-        currentSlideResolution = rightVerticalMotor.getCurrentPosition();
-
         waitForStart();
+        intakeTilt.setPosition(0.8);
+        depoLeft.setPosition(0);
         while (opModeIsActive()) {
 
-            //RUNS DRIVE
-            tankDrive();
-
-
-            //CHECKS INTAKE SENSORS (experimental)
-            //TODO: See if this works.
-            /*
-            getColor();
-
-            boolean blockInColorSensors = false;
-            //red block in the intake
-            if(redValue > redThreshold){
-                telemetry.addData("Block Color Detected: ", "Red: " + redValue);
-                telemetry.update();
-
-                blockInColorSensors = true;
-
-                //checks if we want the color, gives feedback
-                if (allianceIsBlue) {
-                    //we don't want it
-                    rumbleGamepads(1, 500);
-                }
-                else {
-                    //we want it
-                    rumbleGamepads(0.5, 200);
-                }
+            if(gamepad1.a){
+                depoLeft.setPosition(0);
+                depoRight.setPosition(0);
+              //  transferPos();
             }
-
-            //blue block in the intake
-            else if(blueValue > blueThreshold){
-                telemetry.addData("Block Color Detected: ", "Blue: " + blueValue);
-                telemetry.update();
-
-                blockInColorSensors = true;
-
-                //checks if we want the color, gives feedback
-                if (allianceIsBlue) {
-                    //we want it
-                    rumbleGamepads(0.5, 200);
-                }
-                else {
-                    //we don't want it
-                    rumbleGamepads(1, 500);
-                }
+            else if (gamepad1.b){
+                depoLeft.setPosition(1);
+                depoRight.setPosition(1);
+                //clipSpecPos();
             }
-
-            //block at the distance sensor
-            if (intakeDistanceSensor.getDistance(DistanceUnit.MM) < distanceThreshold) {
-                telemetry.addData("Block Detected: ", intakeDistanceSensor.getDistance(DistanceUnit.MM));
-                telemetry.update();
-
-                //there are multiple blocks in the intake
-                if (blockInColorSensors) {
-                    rumbleGamepads(1, 500);
-                }
-            }
-
-             */
-
-
-
-
-            //HANG COMPONENTS
-
-            //rack and pinion hangers
-            if (gamepad1.x) {
-                hangersUp();
-            }
-            else if (gamepad1.y) {
-                hangersDown();
-            }
-
-
-            //INTAKE COMPONENTS
-
-            //set intake stopper based on hort switch
-            if (!hortSwitch.isPressed()) {
-                intakeStopper.setPosition(0.105);
-                Rumbled = false;
-                gamepad2.stopRumble();
-            }
-            else if(hortSwitch.isPressed()) {
-                intakeStopper.setPosition(0.46);
-                if(!Rumbled){
-                    gamepad2.rumble(500);
-                    gamepad2.rumble(500);
-                    Rumbled = true;
-                }
-            }
-
-            //intake or outtake
-            if (gamepad2.a) {
-                intake.setPower(-1);
-                intakeDown();
-            }
-            else if (gamepad2.b) {
-                intake.setPower(1);
-                intakeUp();
-            }
-            else {
-                intake.setPower(0);
-            }
-
-
-            //CLAW AND DEPO COMPONENTS
-
-            //open or close the claw
-            if (gamepad2.y){
-                openClaw();
-            }
-            else if(gamepad2.x){
-                closeClaw();
-            }
-
-
-            //depo positions
-
-            //grab spec
-            if (gamepad2.dpad_left) {
+            else if(gamepad1.x){
                 grabSpecPos();
             }
-
-            //clip spec
-            else if (gamepad2.dpad_right) {
-                clipSpecPos();
-            }
-
-            //bucket drop
-            else if (gamepad2.dpad_up) {
+            else if(gamepad1.y){
                 basketPos();
             }
 
-            //transfer reset
-            else if (gamepad2.dpad_down) {
-                transferPos();
+            if(gamepad1.right_bumper){
+                openClaw();
+            }
+            else if(gamepad1.left_bumper){
+                closeClaw();
             }
 
-
-
-
-
-
-
-
-            //SLIDE COMPONENTS
-
-            //vert up, down, or hold
-            if (gamepad2.right_trigger > 0.3) {
-                rightVerticalMotor.setPower(-1);
-                leftVerticalMotor.setPower(1);
-                specimenToHighBar = false;
-            }
-            else if (gamepad2.left_trigger > 0.3) {
-                rightVerticalMotor.setPower(1);
-                leftVerticalMotor.setPower(-1);
-                specimenToHighBar = false;
-            }
-            else if(vertSwitch.isPressed() && !(gamepad2.right_trigger > 0.3) && !specimenToHighBar){
-                rightVerticalMotor.setPower(0);
-                leftVerticalMotor.setPower(0);
-
-            }
-           else if (specimenToHighBar) {
-                leftVerticalMotor.setPower(1);
-                rightVerticalMotor.setPower(-1);
-
-                if (Math.abs(rightVerticalMotor.getCurrentPosition()) > currentSlideResolution+1750) {
-                    rightVerticalMotor.setPower(-0.15);
-                    leftVerticalMotor.setPower(0.15);
-                    specimenToHighBar = false;
-                }
-            }
-            else {
-                rightVerticalMotor.setPower(-0.15);
-                leftVerticalMotor.setPower(0.15);
-            }
-
-
-            //hort in, out, or neutral
-            if (gamepad2.left_bumper) {
-                extension.setPower(1);
-                intakeTravelPos();
-            }
-
-            else if (gamepad2.right_bumper) {
-                extension.setPower(-1);
-                intakeTravelPos();
-            }
-            else {
-                extension.setPower(0);
-            }
-
-
-
-
-
-            //UPDATE TELEMETRY
-            colorTelmetry();
-            slideTelemetry();
         }
     }
 
@@ -358,22 +174,22 @@ public class LeagueQualDrive extends LinearOpMode {
     }
 
     private void closeClaw() {
-        claw.setPosition(0.68);
+        claw.setPosition(0.59);
         intakeStopper.setPosition(0.46);
     }
 
     private void grabSpecPos() {
-        depoRight.setPosition(0.1);
-        depoLeft.setPosition(0.1);
+        //depoRight.setPosition(1);
+        depoLeft.setPosition(0.94);
         extendDepo.setPosition(0.67);
-        wristClaw.setPosition(0.31);
+        wristClaw.setPosition(0.96);
     }
 
     private void clipSpecPos() {
-        depoLeft.setPosition(0.8);
-        depoRight.setPosition(0.8);
+        depoLeft.setPosition(0.34);
+        //depoRight.setPosition(0.1);
         extendDepo.setPosition(0.6);
-        wristClaw.setPosition(0.96);
+        wristClaw.setPosition(0.31);
 
         if(vertSwitch.isPressed()) {
             currentSlideResolution = rightVerticalMotor.getCurrentPosition();
@@ -384,17 +200,17 @@ public class LeagueQualDrive extends LinearOpMode {
     }
 
     private void transferPos() {
-        depoRight.setPosition(0.91);
-        depoLeft.setPosition(0.91);
-        wristClaw.setPosition(0.31); //0.8
-        extendDepo.setPosition(0.6);//0.625
+        // depoRight.setPosition(0.03);
+        depoLeft.setPosition(0.25);
+        wristClaw.setPosition(0.96); //0.8
+        extendDepo.setPosition(0.58);//0.625
     }
 
     private void basketPos() {
-        depoRight.setPosition(0.3);
-        depoLeft.setPosition(0.3);
+        //depoRight.setPosition(0.63);
+        depoLeft.setPosition(0.8);
         extendDepo.setPosition(0.67);
-        wristClaw.setPosition(0.31);
+        wristClaw.setPosition(.96);
     }
 
     private double getColor(String color) {

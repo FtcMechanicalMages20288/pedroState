@@ -51,7 +51,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class ServoPositionHelper extends LinearOpMode {
 
     // Declare OpMode member.
-    private Servo servo = null;
+    private Servo servo, servo1 = null;
 
     /*
      * Create a variable which we will modify with our code. Eventually we will instruct
@@ -82,24 +82,34 @@ public class ServoPositionHelper extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        servo = hardwareMap.get(Servo.class, "LeftDepo");
+        servo1 = hardwareMap.get(Servo.class, "RightDepo");
+        servo1.setDirection(Servo.Direction.REVERSE);
         telemetry.addData("Status", "Initialized");
 
+        servo1.setPosition(.98);
+        servo.setPosition(1);
         /*
          * Initialize the hardware variables, string here must exactly match the name of a configured
          * servo in the Robot Configuration on your Driver Station.
          */
-        servo = hardwareMap.get(Servo.class, "wristClaw");
+
 
         /*
          * Set the servo to an initial position of 0.5, we do this before the while (opModeIsActive())
          * loop starts so that we can install the servo attachment in a "known" position.
          * There isn't anything special about doing this at 0.5. We could instead choose 0, or 1!
          */
-        servoPosition = 0.5;
-        servo.setPosition(servoPosition);
+        //servoPosition = 1;
+        //servo.setPosition(servoPosition);
+       // servo.setDirection(Servo.Direction.REVERSE);
+
+       // servo1.setPosition(servoPosition-0.02);
 
 
-        telemetry.addData("Servo Set Position: ",servo.getPosition());
+
+        telemetry.addData("Depo Left Position: ",servo.getPosition());
+        telemetry.addData("Depo Right Position: ",servo1.getPosition());
         telemetry.update();
 
         // Wait for the game to start (driver presses START)
@@ -156,6 +166,7 @@ public class ServoPositionHelper extends LinearOpMode {
              * so that we can be sure not to write conflicting positions to the servo.
              */
             servo.setPosition(servoPosition);
+            servo1.setPosition(servoPosition);
 
             // Because our logic has finished, we set our "previousGamepad" booleans to the current ones.
             previousGamepadY = currentGamepadY;
