@@ -45,6 +45,7 @@ public class LeagueQualDrive extends LinearOpMode {
 
     private boolean allianceIsBlue = true;
     private boolean specimenToHighBar = false;
+    private boolean Rumbled = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -117,6 +118,7 @@ public class LeagueQualDrive extends LinearOpMode {
         hangersUp();
         intakeStopper.setPosition(0);
 
+        currentSlideResolution = rightVerticalMotor.getCurrentPosition();
 
         waitForStart();
         while (opModeIsActive()) {
@@ -199,9 +201,16 @@ public class LeagueQualDrive extends LinearOpMode {
             //set intake stopper based on hort switch
             if (!hortSwitch.isPressed()) {
                 intakeStopper.setPosition(0.105);
+                Rumbled = false;
+                gamepad2.stopRumble();
             }
             else if(hortSwitch.isPressed()) {
                 intakeStopper.setPosition(0.46);
+                if(!Rumbled){
+                    gamepad2.rumble(500);
+                    gamepad2.rumble(500);
+                    Rumbled = true;
+                }
             }
 
             //intake or outtake
@@ -349,55 +358,72 @@ public class LeagueQualDrive extends LinearOpMode {
 
     private void closeClaw() {
         claw.setPosition(0.59);
-
+        intakeStopper.setPosition(0.46);
     }
 
     private void grabSpecPos() {
-        depoRight.setPosition(0.75);
-        depoLeft.setPosition(0.25);
+        //depoRight.setPosition(1);
+        depoLeft.setPosition(0.94);
         extendDepo.setPosition(0.67);
-        wristClaw.setPosition(1);
+        wristClaw.setPosition(0.96);
     }
 
     private void clipSpecPos() {
-        depoLeft.setPosition(0.9);
-        depoRight.setPosition(0.1);
+        depoLeft.setPosition(0.34);
+        //depoRight.setPosition(0.1);
         extendDepo.setPosition(0.6);
-        wristClaw.setPosition(0.45);
+        wristClaw.setPosition(0.31);
 
-        currentSlideResolution = rightVerticalMotor.getCurrentPosition();
+        if(vertSwitch.isPressed()) {
+            currentSlideResolution = rightVerticalMotor.getCurrentPosition();
+        }
         specimenToHighBar = true;
 
 
     }
 
     private void transferPos() {
-        depoRight.setPosition(0.03);
-        depoLeft.setPosition(0.97);
-        wristClaw.setPosition(1); //0.8
+       // depoRight.setPosition(0.03);
+        depoLeft.setPosition(0.25);
+        wristClaw.setPosition(0.96); //0.8
         extendDepo.setPosition(0.58);//0.625
     }
 
     private void basketPos() {
-        depoRight.setPosition(0.63);
-        depoLeft.setPosition(0.37);
+        //depoRight.setPosition(0.63);
+        depoLeft.setPosition(0.8);
         extendDepo.setPosition(0.67);
-        wristClaw.setPosition(1);
+        wristClaw.setPosition(.96);
     }
 
-    private void getColor() {
-        redValue = intakeColorSensor.red();
-        greenValue = intakeColorSensor.green();
-        blueValue = intakeColorSensor.blue();
-        alphaValue = intakeColorSensor.alpha();
+    private double getColor(String color) {
+        if(color.equals("red")){
+            redValue = intakeColorSensor.red();
+            return redValue;
+        }
+        if(color.equals("blue")){
+            blueValue = intakeColorSensor.blue();
+            return blueValue;
+        }
+        if(color.equals("green")){
+            greenValue = intakeColorSensor.green();
+            return greenValue;
+        }
+        if(color.equals("alpha")){
+            alphaValue = intakeColorSensor.alpha();
+            return alphaValue;
+        }
+
+
+        return 0;
 
     }
 
     private void colorTelmetry() {
-        telemetry.addData("red", "%.2f", redValue);
-        telemetry.addData("blue", "%.2f", blueValue);
-        telemetry.addData("green", "%.2f", greenValue);
-        telemetry.addData("alpha", "%.2f", alphaValue);
+        telemetry.addData("red", "%.2f", getColor("red"));
+        telemetry.addData("blue", "%.2f", getColor("blue"));
+        telemetry.addData("green", "%.2f", getColor("green"));
+        telemetry.addData("alpha", "%.2f", getColor("alpha"));
         telemetry.addData("Slides:", Math.abs(rightVerticalMotor.getCurrentPosition()));
     }
 

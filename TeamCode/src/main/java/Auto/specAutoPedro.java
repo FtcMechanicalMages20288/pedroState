@@ -31,7 +31,7 @@ import pedroPathing.constants.LConstants;
  * @version 2.0, 11/28/2024
  */
 
-@Autonomous(name = "Specimen Auto Pedro")
+@Autonomous(name = "Specimen Auto Pedro", group = "Examples")
 public class specAutoPedro extends OpMode {
 
     private DcMotor frontLeft, backLeft, frontRight, backRight, extension;
@@ -40,7 +40,9 @@ public class specAutoPedro extends OpMode {
     private TouchSensor vertSwitch, hortSwitch;
     private ColorSensor colorChute;
     private boolean slidesOff = false;
+    private boolean timerCondition = false;
 
+    long currentTimer;
 
 
     private Follower follower;
@@ -63,22 +65,23 @@ public class specAutoPedro extends OpMode {
     private final Pose startPose = new Pose(9, 69, Math.toRadians(90));
 
     /** Scoring Pose of our robot.  */
-    private final Pose scorePose = new Pose(34.3, 69, Math.toRadians(180));
+        private final Pose scorePose = new Pose(34.3, 69, Math.toRadians(180));
+    private final Pose tangentalScorePose = new Pose(32, 69, Math.toRadians(180));
     private final Pose scorePoseSpeed = new Pose(34.3, 68.5, Math.toRadians(180));
 
     /** Push the samples on the ground**/
-    private final Pose lineUpControl = new Pose (19,34,Math.toRadians(180));
-    private final Pose lineUp = new Pose(56,32,Math.toRadians(180));
-    private final Pose firstPush = new Pose(22,27.5, Math.toRadians(180));
+    private final Pose lineUpControl = new Pose (19,36,Math.toRadians(180));
+    private final Pose lineUp = new Pose(54,32.5,Math.toRadians(180));
+    private final Pose firstPush = new Pose(22,27, Math.toRadians(180));
     private final Pose goBackControl = new Pose(64,31.3, Math.toRadians(180));
-    private final Pose goBack = new Pose(56,23, Math.toRadians(180));
+    private final Pose goBack = new Pose(54,23, Math.toRadians(180));
     private final Pose secondPush = new Pose(20, 21, Math.toRadians(180));
 
     private final Pose goBack2Control = new Pose(63.19464787788005,25.53755903031544, Math.toRadians(180));
-    private final Pose goBack2 = new Pose(56,12, Math.toRadians(180));
-    private final Pose thirdPush = new Pose(13, 12, Math.toRadians(180)); //try 15 for x to go faster
+    private final Pose goBack2 = new Pose(54,12, Math.toRadians(180));
+    private final Pose thirdPush = new Pose(20, 12, Math.toRadians(180)); //try 15 for x to go faster
 
-    private final Pose goBack3 = new Pose(11.5,12, Math.toRadians(180));
+    private final Pose goBack3 = new Pose(14.3,12, Math.toRadians(180));
 
 
     /** Block pickup pose**/
@@ -129,7 +132,7 @@ public class specAutoPedro extends OpMode {
 
                 .addParametricCallback(0.1, () -> slidesRunUP(1400))
                 .addParametricCallback(0.1, this::  specimenClip)
-                .addParametricCallback(0.92, ()-> slidesDownTime(0.3))
+                .addParametricCallback(0.89, ()-> slidesDownTime(0.3))
                 .addParametricCallback(1, this::openClaw)
                 .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
 
@@ -181,13 +184,17 @@ public class specAutoPedro extends OpMode {
         scorePickup1 = follower.pathBuilder()
                 //TODO Score 1
 
-                .addPath(new BezierLine(new Point(goBack3), new Point(scorePose)))
-                .setLinearHeadingInterpolation(goBack3.getHeading(), scorePose.getHeading())
-                .addParametricCallback(0.05, this::  intermediateArmPosition)
+                .addPath(new BezierLine(new Point(goBack3), new Point(tangentalScorePose)))
                 .addParametricCallback(0.05, () -> slidesRunUP(1300))
+                .addParametricCallback(0.8, this::  specimenClip)
+                .setTangentHeadingInterpolation()
+                .addPath(new BezierLine(new Point(tangentalScorePose), new Point(scorePose)))
+                .setLinearHeadingInterpolation(tangentalScorePose.getHeading(), scorePose.getHeading())
+                //
+                //  .addParametricCallback(0.05, this::  intermediateArmPosition)
+
                 //  .addParametricCallback(0.11, this::intermediateArmPosition)
                 .addParametricCallback(0.95, ()-> slidesDownTime(0.45)) //TODO change back to 3 if too slow
-                .addParametricCallback(0.8, this::  specimenClip)
                 .addParametricCallback(1, this::openClaw)
                 .addPath(new BezierLine(new Point(scorePose), new Point(pickup1Pose)))
                 .addParametricCallback(0.1, this::depoReset)
@@ -272,7 +279,18 @@ public class specAutoPedro extends OpMode {
 
             case 1:
                 if(!follower.isBusy()){
+
+                    if(!timerCondition) {
+                        currentTimer = opmodeTimer.getElapsedTime();
+                        timerCondition = true;
+                    }
+
+                    while(currentTimer + 800 > opmodeTimer.getElapsedTime()) {
+
+                    }
                     closeClaw();
+                    intermediateArmPosition();
+
                     follower.followPath(scorePickup1);
                     setPathState(2);
                 }

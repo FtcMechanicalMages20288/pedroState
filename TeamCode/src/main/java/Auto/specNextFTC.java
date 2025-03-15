@@ -25,7 +25,7 @@ import Subsystems.Subsystems.Lift;
 import pedroPathing.constants.FConstants;
 import pedroPathing.constants.LConstants;
 
-@Autonomous(name = "Specimen Auto NextFTC")
+@Autonomous(name = "Specimen Auto NextFTC", group = "Examples")
 public class specNextFTC extends PedroOpMode {
     public specNextFTC() {
         super(Claw.INSTANCE, Lift.INSTANCE, Depo.INSTANCE);

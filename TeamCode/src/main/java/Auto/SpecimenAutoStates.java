@@ -31,7 +31,7 @@ import pedroPathing.constants.LConstants;
  * @version 2.0, 11/28/2024
  */
 
-@Autonomous(name = "Specimen Auto States", group = "Examples")
+@Autonomous(name = "Specimen Auto States")
 public class SpecimenAutoStates extends OpMode {
 
     private DcMotor frontLeft, backLeft, frontRight, backRight, extension;
@@ -185,7 +185,8 @@ public class SpecimenAutoStates extends OpMode {
 
                 .addPath(new BezierLine(new Point(goBack3), new Point(scorePose)))
                 .setLinearHeadingInterpolation(goBack3.getHeading(), scorePose.getHeading())
-              //3  .addParametricCallback(0.05, this::  intermediateArmPosition)
+              //
+                //  .addParametricCallback(0.05, this::  intermediateArmPosition)
                 .addParametricCallback(0.05, () -> slidesRunUP(1300))
               //  .addParametricCallback(0.11, this::intermediateArmPosition)
                 .addParametricCallback(0.95, ()-> slidesDownTime(0.45)) //TODO change back to 3 if too slow
@@ -280,10 +281,13 @@ public class SpecimenAutoStates extends OpMode {
                          timerCondition = true;
                      }
 
-                    while(currentTimer + 800 > opmodeTimer.getElapsedTime()) {
+                    while(currentTimer + 500 > opmodeTimer.getElapsedTime()) {
 
                    }
                     closeClaw();
+                    while(currentTimer + 200 > opmodeTimer.getElapsedTime()) {
+
+                    }
                     intermediateArmPosition();
 
                     follower.followPath(scorePickup1);
@@ -354,7 +358,10 @@ public class SpecimenAutoStates extends OpMode {
         follower.setStartingPose(startPose);
         buildPaths();
         closeClaw();
-        intakeTilt.setPosition(0.65);
+        //specimenClip();
+        wristClaw.setPosition(0.96);
+        //pickupSpecimen();
+       // intakeTilt.setPosition(0.65);
 
 
     }
@@ -420,10 +427,9 @@ public class SpecimenAutoStates extends OpMode {
 
 
     public void depoReset(){
-        depoLeft.setPosition(0.97);
-        depoRight.setPosition(0.03);
         extendDepo.setPosition(0.71);
-        wristClaw.setPosition(0.45);
+        wristClaw.setPosition(0.31);
+        depoLeft.setPosition(0.25);
 
 
         leftVerticalMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -461,29 +467,28 @@ public class SpecimenAutoStates extends OpMode {
     }
 
     public void pickupSpecimen(){
-        depoLeft.setPosition(0.97);
-        depoRight.setPosition(0.03);
         extendDepo.setPosition(0.4);
-        wristClaw.setPosition(0.45);
+        wristClaw.setPosition(0.31);
+        depoLeft.setPosition(0.25);
+
 
     }
 
     public void intermediateArmPosition(){
         depoLeft.setPosition(0.5);
-        depoRight.setPosition(0.5);
+       // depoRight.setPosition(0.5);
         extendDepo.setPosition(.67);
-        wristClaw.setPosition(1);
+        wristClaw.setPosition(0.96);
 
     }
 
 
 
     public void specimenClip(){
-        depoLeft.setPosition(0.3);
-        depoRight.setPosition(0.7);
-        extendDepo.setPosition(.67);
-        wristClaw.setPosition(1); // servo facin up on rotation
-        // servo facin down   wristClaw.setPosition(0.45);
+        depoLeft.setPosition(0.94);
+        extendDepo.setPosition(0.67);
+        wristClaw.setPosition(0.96);
+
 
     }
 
@@ -491,13 +496,13 @@ public class SpecimenAutoStates extends OpMode {
         depoLeft.setPosition(0.3);
         depoRight.setPosition(0.7);
         extendDepo.setPosition(.67);
-        wristClaw.setPosition(1); // servo facin up on rotation
+        wristClaw.setPosition(0.96); // servo facin up on rotation
         // servo facin down   wristClaw.setPosition(0.45);
 
     }
 
     public void closeClaw(){
-        claw.setPosition(0.58);
+        claw.setPosition(0.65);
     }
 
 
