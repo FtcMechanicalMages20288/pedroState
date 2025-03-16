@@ -82,7 +82,8 @@ public class ServoPositionHelper extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        servo = hardwareMap.get(Servo.class, "extendDepo");
+        servo = hardwareMap.get(Servo.class, "RightDepo");
+        servo.setDirection(Servo.Direction.REVERSE);
         //servo1 = hardwareMap.get(Servo.class, "RightDepo");
         //servo1.setDirection(Servo.Direction.REVERSE);
         telemetry.addData("Status", "Initialized");

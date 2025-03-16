@@ -62,7 +62,7 @@ public class SpecimenAutoStates extends OpMode {
      * Lets assume the Robot is facing the human player and we want to score in the bucket */
 
     /** Start Pose of our robot */
-    private final Pose startPose = new Pose(9, 69, Math.toRadians(90));
+    private final Pose startPose = new Pose(9, 69-5.625, Math.toRadians(90));
 
     /** Scoring Pose of our robot.  */
     private final Pose scorePose = new Pose(34.3, 69, Math.toRadians(180));
@@ -359,8 +359,9 @@ public class SpecimenAutoStates extends OpMode {
 
         buildPaths();
         closeClaw();
-        specimenClip();
+        //pickupSpecimen();
         //specimenClip();
+
         wristClaw.setPosition(0.96);
         //pickupSpecimen();
        // intakeTilt.setPosition(0.65);
@@ -430,7 +431,7 @@ public class SpecimenAutoStates extends OpMode {
 
     public void depoReset(){
         depoRight.setPosition(0.91);
-        depoLeft.setPosition(0.91);
+     //   depoLeft.setPosition(0.91);
         wristClaw.setPosition(0.31); //0.8
 
 
@@ -469,8 +470,8 @@ public class SpecimenAutoStates extends OpMode {
     }
 
     public void pickupSpecimen(){
-        depoRight.setPosition(0.12);
-        depoLeft.setPosition(0.91);
+        depoRight.setPosition(.91);
+        //depoLeft.setPosition(0.91);
         wristClaw.setPosition(0.31); //0.8
         extendDepo.setPosition(0.4);//0.625
 
@@ -478,9 +479,9 @@ public class SpecimenAutoStates extends OpMode {
     }
 
     public void intermediateArmPosition(){
-        depoLeft.setPosition(0.5);
+    //    depoLeft.setPosition(0.5);
         depoRight.setPosition(0.5);
-        extendDepo.setPosition(.67);
+        extendDepo.setPosition(.58);
         wristClaw.setPosition(0.96);
 
     }
@@ -489,8 +490,8 @@ public class SpecimenAutoStates extends OpMode {
 
     public void specimenClip(){
         depoRight.setPosition(0.1);
-        depoLeft.setPosition(0.1);
-        extendDepo.setPosition(0.67);
+      //  depoLeft.setPosition(0.1);
+        extendDepo.setPosition(0.58);
         wristClaw.setPosition(0.96);
 
 
@@ -518,6 +519,7 @@ public class SpecimenAutoStates extends OpMode {
     public void initHw(){
         intake = hardwareMap.dcMotor.get("intake");
         extendDepo = hardwareMap.servo.get("extendDepo");
+        //extendDepo.setDirection(Servo.Direction.REVERSE);
         depoRight = hardwareMap.servo.get("RightDepo");
         depoRight.setDirection(Servo.Direction.REVERSE);
         depoLeft = hardwareMap.servo.get("LeftDepo");
@@ -554,7 +556,8 @@ public class SpecimenAutoStates extends OpMode {
         leftVerticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightVerticalMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        rightVerticalMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightVerticalMotor.setDirection(DcMotor.Direction.FORWARD);
+        leftVerticalMotor.setDirection(DcMotor.Direction.REVERSE);
 
     }
 

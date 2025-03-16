@@ -376,7 +376,7 @@ public class LeagueQualDrive extends LinearOpMode {
     }
 
     private void openClaw() {
-        claw.setPosition(0.48);
+        claw.setPosition(0.52);
 
     }
 
@@ -386,17 +386,17 @@ public class LeagueQualDrive extends LinearOpMode {
     }
 
     private void grabSpecPos() {
-        depoRight.setPosition(0.1);
-        depoLeft.setPosition(0.1);
+        depoRight.setPosition(0.97);
+        //depoLeft.setPosition(0.1);
         extendDepo.setPosition(0.56);
-        wristClaw.setPosition(0.31);
+        wristClaw.setPosition(0.96);
     }
 
     private void clipSpecPos() {
-        depoLeft.setPosition(0.8);
-        depoRight.setPosition(0.8);
+       // depoLeft.setPosition(0.4);
+        depoRight.setPosition(0.4);
         extendDepo.setPosition(0.4);
-        wristClaw.setPosition(0.96);
+        wristClaw.setPosition(0.31);
 
         if(vertSwitch.isPressed()) {
             currentSlideResolution = rightVerticalMotor.getCurrentPosition();
@@ -407,17 +407,17 @@ public class LeagueQualDrive extends LinearOpMode {
     }
 
     private void transferPos() {
-        depoRight.setPosition(0.91);
-        depoLeft.setPosition(0.91);
-        wristClaw.setPosition(0.31); //0.8
-        extendDepo.setPosition(0.53);//0.625
+        depoRight.setPosition(0.33);
+       // depoLeft.setPosition(0.91);
+        wristClaw.setPosition(0.96); //0.8
+        extendDepo.setPosition(0.51);//0.625
     }
 
     private void basketPos() {
-        depoRight.setPosition(0.3);
-        depoLeft.setPosition(0.3);
+        depoRight.setPosition(0.86);
+      //  depoLeft.setPosition(0.3);
         extendDepo.setPosition(0.56);
-        wristClaw.setPosition(0.31);
+        wristClaw.setPosition(0.96);
     }
 
     private double getColor(String color) {
