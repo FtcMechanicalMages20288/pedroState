@@ -38,14 +38,16 @@ public class LeagueQualDrive extends LinearOpMode {
     private double greenValue;
     private double blueValue;
     private double alphaValue;
-    private double redThreshold = 0;
+    private double redThreshold = 200;
     private double blueThreshold = 0;
     private double distanceThreshold = 40;
     private int currentSlideResolution;
+    boolean blockFound = false;
 
     private boolean allianceIsBlue = true;
     private boolean specimenToHighBar = false;
     private boolean Rumbled = false;
+    private boolean intakeRumbled = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -101,6 +103,11 @@ public class LeagueQualDrive extends LinearOpMode {
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
+        leftVerticalMotor.setDirection(DcMotor.Direction.REVERSE);
+        rightVerticalMotor.setDirection(DcMotor.Direction.REVERSE);
+
 
         //set vert behaviors
         leftVerticalMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -215,13 +222,25 @@ public class LeagueQualDrive extends LinearOpMode {
             }
 
             //intake or outtake
-            if (gamepad2.a) {
+            if (gamepad2.a && !blockFound) {
                 intake.setPower(-1);
                 intakeDown();
             }
             else if (gamepad2.b) {
                 intake.setPower(1);
+                blockFound = false;
+                intakeRumbled = false;
                 intakeUp();
+            }
+            else if(blockFound){
+                intake.setPower(1);
+                if(!intakeRumbled) {
+                    gamepad2.rumble(500);
+                    gamepad2.rumble(500);
+                    //intakeRumbled = true;
+                }
+
+
             }
             else {
                 intake.setPower(0);
@@ -316,6 +335,10 @@ public class LeagueQualDrive extends LinearOpMode {
                 extension.setPower(0);
             }
 
+            if(getColor("red") > redThreshold && redThreshold < 300){
+                //blockFound = true;
+            }
+            //if(getColor("blue" > blueThreshold ))
 
 
 
@@ -365,14 +388,14 @@ public class LeagueQualDrive extends LinearOpMode {
     private void grabSpecPos() {
         depoRight.setPosition(0.1);
         depoLeft.setPosition(0.1);
-        extendDepo.setPosition(0.67);
+        extendDepo.setPosition(0.56);
         wristClaw.setPosition(0.31);
     }
 
     private void clipSpecPos() {
         depoLeft.setPosition(0.8);
         depoRight.setPosition(0.8);
-        extendDepo.setPosition(0.6);
+        extendDepo.setPosition(0.4);
         wristClaw.setPosition(0.96);
 
         if(vertSwitch.isPressed()) {
@@ -387,13 +410,13 @@ public class LeagueQualDrive extends LinearOpMode {
         depoRight.setPosition(0.91);
         depoLeft.setPosition(0.91);
         wristClaw.setPosition(0.31); //0.8
-        extendDepo.setPosition(0.6);//0.625
+        extendDepo.setPosition(0.53);//0.625
     }
 
     private void basketPos() {
         depoRight.setPosition(0.3);
         depoLeft.setPosition(0.3);
-        extendDepo.setPosition(0.67);
+        extendDepo.setPosition(0.56);
         wristClaw.setPosition(0.31);
     }
 

@@ -138,7 +138,7 @@ public class armNintake extends LinearOpMode {
             else if(gamepad1.left_bumper){
                 closeClaw();
             }
-
+            colorTelmetry();
         }
     }
 
@@ -213,36 +213,7 @@ public class armNintake extends LinearOpMode {
         wristClaw.setPosition(.96);
     }
 
-    private double getColor(String color) {
-        if(color.equals("red")){
-            redValue = intakeColorSensor.red();
-            return redValue;
-        }
-        if(color.equals("blue")){
-            blueValue = intakeColorSensor.blue();
-            return blueValue;
-        }
-        if(color.equals("green")){
-            greenValue = intakeColorSensor.green();
-            return greenValue;
-        }
-        if(color.equals("alpha")){
-            alphaValue = intakeColorSensor.alpha();
-            return alphaValue;
-        }
 
-
-        return 0;
-
-    }
-
-    private void colorTelmetry() {
-        telemetry.addData("red", "%.2f", getColor("red"));
-        telemetry.addData("blue", "%.2f", getColor("blue"));
-        telemetry.addData("green", "%.2f", getColor("green"));
-        telemetry.addData("alpha", "%.2f", getColor("alpha"));
-        telemetry.addData("Slides:", Math.abs(rightVerticalMotor.getCurrentPosition()));
-    }
 
     private void slideTelemetry() {
         if (vertSwitch.isPressed()) {
@@ -314,5 +285,36 @@ public class armNintake extends LinearOpMode {
     private void rumbleGamepads(double intensity, int duration) {
         gamepad1.rumble(intensity, intensity, duration);
         gamepad2.rumble(intensity, intensity, duration);
+    }
+    private double getColor(String color) {
+        if(color.equals("red")){
+            redValue = intakeColorSensor.red();
+            return redValue;
+        }
+        if(color.equals("blue")){
+            blueValue = intakeColorSensor.blue();
+            return blueValue;
+        }
+        if(color.equals("green")){
+            greenValue = intakeColorSensor.green();
+            return greenValue;
+        }
+        if(color.equals("alpha")){
+            alphaValue = intakeColorSensor.alpha();
+            return alphaValue;
+        }
+
+
+        return 0;
+
+    }
+
+    private void colorTelmetry() {
+        telemetry.addData("red", "%.2f", getColor("red"));
+        telemetry.addData("blue", "%.2f", getColor("blue"));
+        telemetry.addData("green", "%.2f", getColor("green"));
+        telemetry.addData("alpha", "%.2f", getColor("alpha"));
+        telemetry.addData("Slides:", Math.abs(rightVerticalMotor.getCurrentPosition()));
+        telemetry.update();
     }
 }

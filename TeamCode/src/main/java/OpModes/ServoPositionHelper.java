@@ -82,13 +82,13 @@ public class ServoPositionHelper extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        servo = hardwareMap.get(Servo.class, "LeftDepo");
-        servo1 = hardwareMap.get(Servo.class, "RightDepo");
-        servo1.setDirection(Servo.Direction.REVERSE);
+        servo = hardwareMap.get(Servo.class, "extendDepo");
+        //servo1 = hardwareMap.get(Servo.class, "RightDepo");
+        //servo1.setDirection(Servo.Direction.REVERSE);
         telemetry.addData("Status", "Initialized");
 
-        servo1.setPosition(.98);
-        servo.setPosition(1);
+        //servo1.setPosition(.98);
+        servo.setPosition(0.5);
         /*
          * Initialize the hardware variables, string here must exactly match the name of a configured
          * servo in the Robot Configuration on your Driver Station.
@@ -109,7 +109,7 @@ public class ServoPositionHelper extends LinearOpMode {
 
 
         telemetry.addData("Depo Left Position: ",servo.getPosition());
-        telemetry.addData("Depo Right Position: ",servo1.getPosition());
+      //  telemetry.addData("Depo Right Position: ",servo1.getPosition());
         telemetry.update();
 
         // Wait for the game to start (driver presses START)
@@ -166,7 +166,7 @@ public class ServoPositionHelper extends LinearOpMode {
              * so that we can be sure not to write conflicting positions to the servo.
              */
             servo.setPosition(servoPosition);
-            servo1.setPosition(servoPosition);
+            //servo1.setPosition(servoPosition);
 
             // Because our logic has finished, we set our "previousGamepad" booleans to the current ones.
             previousGamepadY = currentGamepadY;
